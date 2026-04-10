@@ -24,7 +24,7 @@ add_library(imgui STATIC
     3rdparty/imgui/backends/imgui_impl_opengl3.cpp
  )
 
-target_include_directories(imgui PUBLIC
+target_include_directories(imgui SYSTEM PUBLIC
     3rdparty/imgui
     3rdparty/imgui/backends
 )
@@ -43,7 +43,7 @@ add_library(implot STATIC
     3rdparty/implot/implot_demo.cpp
  )
 
-target_include_directories(implot PUBLIC
+target_include_directories(implot SYSTEM PUBLIC
     3rdparty/implot
 )
 
@@ -58,8 +58,24 @@ add_library(glad STATIC
     3rdparty/glad/src/gl.c
 )
 
-target_include_directories(glad PUBLIC
+target_include_directories(glad SYSTEM PUBLIC
     3rdparty/glad/include
+)
+
+#-------------------------------------------------------------------------------
+# Setup stb image lib
+#-------------------------------------------------------------------------------
+add_library(stb_image STATIC
+    3rdparty/stb/src/stb_load_image.cpp
+)
+
+target_include_directories(stb_image SYSTEM PUBLIC
+    3rdparty/stb/include
+)
+
+target_link_libraries(stb_image PUBLIC
+    OpenGL::GL
+    glad
 )
 
 #-------------------------------------------------------------------------------
@@ -68,6 +84,7 @@ target_include_directories(glad PUBLIC
 add_executable(WheelSimulator
     src/main.cpp
     src/application.cpp
+    src/view.cpp
 )
 
 target_compile_features(WheelSimulator PRIVATE cxx_std_23)
@@ -85,13 +102,18 @@ target_link_libraries(WheelSimulator PRIVATE
     glad
     imgui
     implot
+    stb_image
 )
 
 target_compile_options(WheelSimulator PRIVATE
     -Wall
     -Wextra
     -Wpedantic
-    # -Weffc++
+    -Weffc++
+)
+
+target_compile_definitions(WheelSimulator PRIVATE
+    SETUP_PATH="${CMAKE_CURRENT_SOURCE_DIR}/setup/"
 )
 
 #-------------------------------------------------------------------------------
