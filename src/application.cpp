@@ -4,7 +4,7 @@ namespace whsim {
 
 void Application::RunLoop()
 {
-    while (!glfwWindowShouldClose(view_.window_)) {
+    while (!view_.ShouldClose()) {
         glfwPollEvents();
         view_.ProcessInput();
 

@@ -6,8 +6,11 @@ struct glColor final {
     float r, g, b, alpha;
 };
 
-inline constexpr const glColor DarkBkgnd{33.0f / 255.0f,
-                                         33.0f / 255.0f,
-                                         33.0f / 255.0f, 1.0f};
+inline constexpr glColor DarkBkgnd{
+    17.0f / 255.0f,
+    17.0f / 255.0f,
+    19.0f / 255.0f,
+    1.0f,
+};
 
-} // namespace whsim::decor
+} // namespace whsim::vstyle
