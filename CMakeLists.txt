@@ -43,7 +43,7 @@ target_link_libraries(imgui_backends PUBLIC
 add_executable(WheelSimulator
     src/main.cpp
     src/application.cpp
-    src/radix_theme.cpp
+    src/ui_theme.cpp
     src/view.cpp
     src/view_panels.cpp
     3rdparty/stb/src/stb_load_image.cpp

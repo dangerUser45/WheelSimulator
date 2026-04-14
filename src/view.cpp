@@ -2,11 +2,11 @@
 #include <stdexcept>
 
 #include <glad/gl.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <implot.h>
 
-#include "radix_theme.hpp"
+#include "ui_theme.hpp"
 #include "visual_style.hpp"
 #include "ui_layout.hpp"
 #include "stb_load_image.hpp"
@@ -93,8 +93,6 @@ void View::InitImGui()
     ImGui::CreateContext();
     ImPlot::CreateContext();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     radix::ConfigureImGuiFonts();
     radix::ApplyImGuiTheme();
 
@@ -144,7 +142,6 @@ void View::RenderUI()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     DrawBackgroundImage();
     ui::DrawHeroPanel();
 

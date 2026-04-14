@@ -3,7 +3,7 @@
 
 #include <imgui.h>
 
-#include "radix_theme.hpp"
+#include "ui_theme.hpp"
 
 namespace whsim::radix {
 
@@ -48,7 +48,6 @@ bool TryLoadPreferredSansFont(ImGuiIO& io, const ImFontConfig& config, const ImW
 void ConfigureImGuiFonts()
 {
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigDpiScaleFonts = true;
     io.Fonts->Clear();
 
     ImFontConfig config{};
@@ -59,7 +58,7 @@ void ConfigureImGuiFonts()
 
     const ImWchar* glyph_ranges = io.Fonts->GetGlyphRangesCyrillic();
     if (!TryLoadPreferredSansFont(io, config, glyph_ranges)) {
-        io.Fonts->AddFontDefaultVector(&config);
+        io.Fonts->AddFontDefault(&config);
     }
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -111,8 +110,6 @@ void ApplyImGuiTheme()
     colors[ImGuiCol_TabActive]             = PanelBgActive;
     colors[ImGuiCol_TabUnfocused]          = PanelBg;
     colors[ImGuiCol_TabUnfocusedActive]    = PanelBgActive;
-    colors[ImGuiCol_DockingPreview]        = ImVec4(Accent.x, Accent.y, Accent.z, 0.30f);
-    colors[ImGuiCol_DockingEmptyBg]        = SurfaceAlt;
     colors[ImGuiCol_PlotLines]             = AccentHover;
     colors[ImGuiCol_PlotLinesHovered]      = Accent;
     colors[ImGuiCol_TableHeaderBg]         = PanelBg;

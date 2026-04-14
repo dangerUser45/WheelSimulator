@@ -13,8 +13,7 @@ constexpr ImGuiWindowFlags kFloatingCardFlags =
     ImGuiWindowFlags_NoDecoration |
     ImGuiWindowFlags_NoMove |
     ImGuiWindowFlags_NoResize |
-    ImGuiWindowFlags_NoSavedSettings |
-    ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags_NoSavedSettings;
 
 void BeginCard(const char* name, const ImVec2& pos, const ImVec2& size)
 {
