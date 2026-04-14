@@ -7,75 +7,34 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(SANITIZE "Enable sanitizers" OFF)
 
 find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
-find_package(Eigen3 REQUIRED NO_MODULE)
+find_package(glfw3  REQUIRED CONFIG)
+find_package(glm    REQUIRED CONFIG)
+find_package(Eigen3 REQUIRED CONFIG)
+find_package(imgui  REQUIRED CONFIG)
+find_package(implot REQUIRED CONFIG)
+find_package(glad   REQUIRED CONFIG)
 
 #-------------------------------------------------------------------------------
-# Setup imgui lib
+# Setup imgui/backends
 #-------------------------------------------------------------------------------
-add_library(imgui STATIC
-    3rdparty/imgui/imgui.cpp
-    3rdparty/imgui/imgui_demo.cpp
-    3rdparty/imgui/imgui_draw.cpp
-    3rdparty/imgui/imgui_tables.cpp
-    3rdparty/imgui/imgui_widgets.cpp
-    3rdparty/imgui/backends/imgui_impl_glfw.cpp
-    3rdparty/imgui/backends/imgui_impl_opengl3.cpp
- )
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+set(IMGUI_PACKAGE_DIR "${imgui_PACKAGE_FOLDER_${BUILD_TYPE_UPPER}}")
+set(IMGUI_BINDINGS_DIR "${IMGUI_PACKAGE_DIR}/res/bindings")
 
-target_include_directories(imgui SYSTEM PUBLIC
-    3rdparty/imgui
-    3rdparty/imgui/backends
+add_library(imgui_backends STATIC
+    "${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.cpp"
+    "${IMGUI_BINDINGS_DIR}/imgui_impl_opengl3.cpp"
 )
 
-target_link_libraries(imgui PUBLIC
-    OpenGL::GL
+target_include_directories(imgui_backends PUBLIC
+    "${IMGUI_BINDINGS_DIR}"
+)
+
+target_link_libraries(imgui_backends PUBLIC
+    imgui::imgui
     glfw
-)
-
-#-------------------------------------------------------------------------------
-# Setup implot lib
-#-------------------------------------------------------------------------------
-add_library(implot STATIC
-    3rdparty/implot/implot.cpp
-    3rdparty/implot/implot_items.cpp
-    3rdparty/implot/implot_demo.cpp
- )
-
-target_include_directories(implot SYSTEM PUBLIC
-    3rdparty/implot
-)
-
-target_link_libraries(implot PUBLIC
-    imgui
-)
-
-#-------------------------------------------------------------------------------
-# Setup glad lib
-#-------------------------------------------------------------------------------
-add_library(glad STATIC
-    3rdparty/glad/src/gl.c
-)
-
-target_include_directories(glad SYSTEM PUBLIC
-    3rdparty/glad/include
-)
-
-#-------------------------------------------------------------------------------
-# Setup stb image lib
-#-------------------------------------------------------------------------------
-add_library(stb_image STATIC
-    3rdparty/stb/src/stb_load_image.cpp
-)
-
-target_include_directories(stb_image SYSTEM PUBLIC
-    3rdparty/stb/include
-)
-
-target_link_libraries(stb_image PUBLIC
+    glad::glad
     OpenGL::GL
-    glad
 )
 
 #-------------------------------------------------------------------------------
@@ -84,25 +43,28 @@ target_link_libraries(stb_image PUBLIC
 add_executable(WheelSimulator
     src/main.cpp
     src/application.cpp
+    src/radix_theme.cpp
     src/view.cpp
+    src/view_panels.cpp
+    3rdparty/stb/src/stb_load_image.cpp
 )
 
-target_compile_features(WheelSimulator PRIVATE cxx_std_23)
+target_compile_features(WheelSimulator PRIVATE cxx_std_20)
 
 target_include_directories(WheelSimulator PRIVATE
     include
+    3rdparty/stb/include
 )
 
 target_link_libraries(WheelSimulator PRIVATE
-    OpenGL::GL
+    Eigen3::Eigen
+    glad::glad
     glfw
     glm::glm
-    Eigen3::Eigen
-
-    glad
-    imgui
-    implot
-    stb_image
+    imgui::imgui
+    imgui_backends
+    implot::implot
+    OpenGL::GL
 )
 
 target_compile_options(WheelSimulator PRIVATE
