@@ -7,7 +7,6 @@
 #include <implot.h>
 
 #include "ui_theme.hpp"
-#include "visual_style.hpp"
 #include "ui_layout.hpp"
 #include "stb_load_image.hpp"
 #include "view_panels.hpp"
@@ -93,8 +92,8 @@ void View::InitImGui()
     ImGui::CreateContext();
     ImPlot::CreateContext();
 
-    radix::ConfigureImGuiFonts();
-    radix::ApplyImGuiTheme();
+    ui::ConfigureImGuiFonts();
+    ui::ApplyImGuiTheme();
 
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -154,7 +153,10 @@ void View::RenderUI()
 
     ImGui::Render();
 
-    glClearColor(cur_bkgnd_color.r, cur_bkgnd_color.g, cur_bkgnd_color.b, cur_bkgnd_color.alpha);
+    glClearColor(ui::BackgroundColorRed,
+                 ui::BackgroundColorGreen,
+                 ui::BackgroundColorBlue,
+                 ui::BackgroundColorAlpha);
 
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

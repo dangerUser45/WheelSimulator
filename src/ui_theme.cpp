@@ -2,10 +2,7 @@
 #include <filesystem>
 
 #include <imgui.h>
-
-#include "ui_theme.hpp"
-
-namespace whsim::radix {
+namespace whsim::ui {
 
 namespace {
 
@@ -155,4 +152,4 @@ void ApplyImGuiTheme()
     style.SeparatorTextPadding    = ImVec2(0.0f, 10.0f);
 }
 
-} // namespace whsim::radix
+} // namespace whsim::ui
