@@ -51,13 +51,21 @@
 ```bash
 git clone https://github.com/dangerUser45/WheelSimulator.git
 cd WheelSimulator
+mkdir build
 
-conan install . -of .cache/conan -s build_type=Release --build=missing
-cmake -S . -B build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DSANITIZE=OFF \
-  -DCMAKE_TOOLCHAIN_FILE=.cache/conan/conan_toolchain.cmake
-cmake --build build
+conan profile detect
+
+conan install . \
+    -s build_type=Release \
+    -c tools.system.package_manager:mode=install \       
+    --build=missing
+
+cmake -S . -B build/Release  \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSANITIZE=OFF \
+    -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake
+
+cmake --build build/Release
 ```
 
 Запуск:

@@ -8,7 +8,7 @@ void Application::RunLoop()
         glfwPollEvents();
         view_.ProcessInput();
 
-        view_.RenderUI();
+        view_.RenderUI(physic_);
     }
 }
 

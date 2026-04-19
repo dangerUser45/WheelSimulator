@@ -1,16 +1,14 @@
 #include <iostream>
-#include <stdexcept>
 
 #include <glad/gl.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <implot.h>
 
-#include "ui_theme.hpp"
-#include "ui_layout.hpp"
+#include "ui.hpp"
 #include "stb_load_image.hpp"
-#include "view_panels.hpp"
 #include "view.hpp"
+#include "physics.hpp"
 
 namespace whsim {
 
@@ -52,13 +50,14 @@ void View::InitWindow()
     glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-#ifdef __APPLE__
+    #ifdef __APPLE__
     // Для macOS обычно нужен этот hint
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    #endif
 
     // 3) Создаём окно
-    GLFWwindow* window = glfwCreateWindow(ui::WindowWidth, ui::WindowHeight, "WheelSimulator", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(ui::WINDOW_WIDTH, ui::WINDOW_HEIGTH,
+                                          "WheelSimulator", nullptr, nullptr);
     if (window == nullptr) {
         throw std::runtime_error("Error: Failed to create GLFW window\n");
     }
@@ -74,16 +73,12 @@ void View::InitWindow()
     }
 
     // 6) Начальный viewport
-    glViewport(0, 0, ui::WindowWidth, ui::WindowHeight);
+    glViewport(0, 0, ui::WINDOW_WIDTH, ui::WINDOW_HEIGTH);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSwapInterval(1);
 
-    glfwSetWindowSizeLimits(
-        window_,
-        ui::MinWindowWidth,
-        ui::MinWindowHeight,
-        GLFW_DONT_CARE,
-        GLFW_DONT_CARE);
+    glfwSetWindowSizeLimits(window_, ui::MIN_WINDOW_WIDTH, ui::MIN_WINDOW_HEIGTH,
+                            GLFW_DONT_CARE, GLFW_DONT_CARE);
 }
 
 void View::InitImGui()
@@ -92,30 +87,38 @@ void View::InitImGui()
     ImGui::CreateContext();
     ImPlot::CreateContext();
 
-    ui::ConfigureImGuiFonts();
-    ui::ApplyImGuiTheme();
+    ui::ConfigureImGui();
+    ui::ConfigureImGuiFont();
 
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // SETUP_PATH defined in CMakeLists.txt
-    // It points to the "setup/" directory in the project root.
-    const std::string preview = std::string(SETUP_PATH) + "preview.png";
+    // PRESETS_PATH defined in CMakeLists.txt
+    // It points to the "presets/" directory in the project root.
+    std::string preview = std::string(PRESETS_PATH) + "img/";
 
-    std::cerr << preview << std::endl;
-    GLuint preview_texture = stb::LoadTexture(preview.c_str(), preview_texture_w_, preview_texture_h_);
+    switch(style_ui_) {
+        case StyleUI::LIGHT: preview += "preview_light.png"; break;
+        case StyleUI::DARK:  preview += "preview_dark.png"; break;
+        default: std::cerr << "Error: unknown ui style type" << std::endl;
+    }
 
-    if(!preview_texture)
-        throw std::runtime_error("Error: preview texture didn't load\n");
+    GLuint preview_texture = stb::LoadTexture(preview.c_str(),
+        prev_img_.width, prev_img_.heigth);
 
-    preview_texture_ = preview_texture;
+    std::cerr << "load preview status: " << preview_texture << std::endl;
+    if(!preview_texture) {
+        // throw std::runtime_error("Error: preview texture didn't load\n");
+        //TODO обработать
+    }
+    prev_img_.texture = preview_texture;
 }
 
 void View::DestroyImGui()
 {
-    if (preview_texture_ != 0) {
-        glDeleteTextures(1, &preview_texture_);
-        preview_texture_ = 0;
+    if (prev_img_.texture != 0) {
+        glDeleteTextures(1, &prev_img_.texture);
+        prev_img_.texture = 0;
     }
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -135,72 +138,44 @@ void View::ProcessInput() const
         glfwSetWindowShouldClose(window_, true);
 }
 
-void View::RenderUI()
+void View::RenderUI(Physics& physics)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    DrawBackgroundImage();
-    ui::DrawHeroPanel();
-
-    if (ui::DrawTopToolbar(show_settings_)) {
-        show_settings_ = !show_settings_;
-    }
-
-    ui::DrawSettingsPanel(settings_, &show_settings_);
-    ui::DrawStatusPanel(settings_);
+    DrawUI(physics);
 
     ImGui::Render();
-
-    glClearColor(ui::BackgroundColorRed,
-                 ui::BackgroundColorGreen,
-                 ui::BackgroundColorBlue,
-                 ui::BackgroundColorAlpha);
-
+    glClearColor(ui::CLEAR_COLOR_RED,
+                 ui::CLEAR_COLOR_GREEN,
+                 ui::CLEAR_COLOR_BLUE,
+                 ui::CLEAR_COLOR_ALPHA);
     glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window_);
 }
 
-void View::DrawBackgroundImage()
+void View::DrawUI(Physics& physics)
 {
-    if (preview_texture_ == 0) {
-        return;
+    if(prev_img_.texture) 
+        ui::DrawPreviewImage(prev_img_);
+
+    ui::DrawMenu(menu_cond_, prev_img_.texture);
+    switch(menu_cond_) {
+        case MenuCond::MAIN:
+            break;
+        case MenuCond::SETTINGS:
+            ui::DrawSettings();
+            break;
+        case MenuCond::SIMULATION:
+            ui::DrawSimulation();
+            break;
+        case MenuCond::GRAPHICS:
+            ui::DrawGraphics();
+            break;
     }
-
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
-
-    ImVec2 image_size{static_cast<float>(preview_texture_w_),
-                      static_cast<float>(preview_texture_h_)};
-
-    ImVec2 pmin(
-        viewport->Pos.x + (viewport->Size.x - image_size.x) * 0.5f,
-        viewport->Pos.y + (viewport->Size.y - image_size.y) * 0.5f);
-
-    ImVec2 pmax(
-        pmin.x + image_size.x,
-        pmin.y + image_size.y);
-
-    draw_list->AddImage(
-        (ImTextureID)(intptr_t)preview_texture_,
-        pmin,
-        pmax);
-
-    const ImVec2 overlay_max(
-        viewport->Pos.x + viewport->Size.x,
-        viewport->Pos.y + viewport->Size.y);
-
-    draw_list->AddRectFilled(
-        viewport->Pos,
-        overlay_max,
-        IM_COL32(
-            10,
-            13,
-            18,
-            static_cast<int>(255.0f * ui::BackgroundOverlayAlpha)));
 }
 
 } // namespace whsim

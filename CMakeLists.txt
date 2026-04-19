@@ -43,9 +43,8 @@ target_link_libraries(imgui_backends PUBLIC
 add_executable(WheelSimulator
     src/main.cpp
     src/application.cpp
-    src/ui_theme.cpp
     src/view.cpp
-    src/view_panels.cpp
+    src/ui.cpp
     3rdparty/stb/src/stb_load_image.cpp
 )
 
@@ -75,7 +74,7 @@ target_compile_options(WheelSimulator PRIVATE
 )
 
 target_compile_definitions(WheelSimulator PRIVATE
-    SETUP_PATH="${CMAKE_CURRENT_SOURCE_DIR}/setup/"
+    PRESETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/presets/"
 )
 
 #-------------------------------------------------------------------------------

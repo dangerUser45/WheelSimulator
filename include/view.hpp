@@ -2,24 +2,32 @@
 
 #include <GLFW/glfw3.h>
 
-#include "view_panels.hpp"
+#include "physics.hpp" 
 
 namespace whsim {
 
+enum class MenuCond {MAIN, SETTINGS, SIMULATION, GRAPHICS};
+enum class StyleUI {LIGHT, DARK};
+
+struct PreviewImage {
+    GLuint texture;
+    int width, heigth;
+};
+
 class View final {
 private:
-    GLFWwindow* window_ = nullptr;
     
-    GLuint preview_texture_ = 0;
-    int preview_texture_w_ = 0;
-    int preview_texture_h_ = 0;
-    bool show_settings_ = false;
-    ui::SettingsState settings_{};
+    PreviewImage prev_img_{};
+    GLFWwindow* window_ = nullptr;
 
-    void DrawBackgroundImage();
+    MenuCond menu_cond_{MenuCond::MAIN};
+    StyleUI style_ui_{StyleUI::DARK};
+    
     void InitWindow();
     void InitImGui();
     void DestroyImGui();
+
+    void DrawUI(Physics& physics);
 
 public:
     View();
@@ -32,7 +40,7 @@ public:
 
     [[nodiscard]] bool ShouldClose() const;
     void ProcessInput() const;
-    void RenderUI();
+    void RenderUI(Physics& physics);
 };
 
 } // namespace whsim
