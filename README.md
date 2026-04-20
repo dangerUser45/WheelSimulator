@@ -53,7 +53,6 @@ pipx install "conan>=2,<3"
 ## Сборка
 
 ### Linux
-
 ```bash
 git clone https://github.com/dangerUser45/WheelSimulator.git
 cd WheelSimulator
@@ -61,10 +60,7 @@ mkdir build
 
 conan profile detect
 
-conan install . \
-    -s build_type=Release \
-    -c tools.system.package_manager:mode=install \
-    --build=missing
+conan install . -s build_type=Release -c tools.system.package_manager:mode=install --build=missing
 
 cmake --preset conan-release
 
@@ -74,5 +70,25 @@ cmake --build build/Release
 Запуск:
 
 ```bash
-build/Release/WheelSimulator
+./build/Release/WheelSimulator
+```
+
+### Windows 
+```powershell
+git clone https://github.com/dangerUser45/WheelSimulator.git
+cd WheelSimulator
+mkdir build
+
+conan profile detect
+
+conan install . -s build_type=Release -c tools.system.package_manager:mode=install --build=missing
+
+cmake --preset conan-default
+
+cmake --build build --config Release
+```
+
+Запуск
+```powershell
+.\build\Release\WheelSimulator.exe
 ```
