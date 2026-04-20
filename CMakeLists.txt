@@ -17,17 +17,13 @@ find_package(glad   REQUIRED CONFIG)
 #-------------------------------------------------------------------------------
 # Setup imgui/backends
 #-------------------------------------------------------------------------------
-string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
-set(IMGUI_PACKAGE_DIR "${imgui_PACKAGE_FOLDER_${BUILD_TYPE_UPPER}}")
-set(IMGUI_BINDINGS_DIR "${IMGUI_PACKAGE_DIR}/res/bindings")
-
 add_library(imgui_backends STATIC
-    "${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.cpp"
-    "${IMGUI_BINDINGS_DIR}/imgui_impl_opengl3.cpp"
+    3rdparty/imgui_backends/src/imgui_impl_glfw.cpp
+    3rdparty/imgui_backends/src/imgui_impl_opengl3.cpp
 )
 
 target_include_directories(imgui_backends PUBLIC
-    "${IMGUI_BINDINGS_DIR}"
+    3rdparty/imgui_backends/include
 )
 
 target_link_libraries(imgui_backends PUBLIC
