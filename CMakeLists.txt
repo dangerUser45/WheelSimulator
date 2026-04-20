@@ -62,12 +62,19 @@ target_link_libraries(WheelSimulator PRIVATE
     OpenGL::GL
 )
 
-target_compile_options(WheelSimulator PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Weffc++
-)
+if(MSVC)
+    target_compile_options(WheelSimulator PRIVATE
+        /W4
+        /permissive-
+    )
+else()
+    target_compile_options(WheelSimulator PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Weffc++
+    )
+endif()
 
 target_compile_definitions(WheelSimulator PRIVATE
     PRESETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/presets/"
