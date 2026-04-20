@@ -43,11 +43,17 @@
   - **3 неделя** — тестирование, исправление ошибок и подготовка финальной
   демонстрации.
 
+## Зависимости
+Основные зависимости выставлены в `conan`. Поэтому для начала необходимо это установить.
+
+```bash
+pipx install "conan>=2,<3"
+```
+
 ## Сборка
-Основные зависимости выставлены в `conan`.
-`stb_image` лежит в репозитории в `3rdparty/stb`.
 
 ### Linux
+
 ```bash
 git clone https://github.com/dangerUser45/WheelSimulator.git
 cd WheelSimulator
@@ -57,13 +63,10 @@ conan profile detect
 
 conan install . \
     -s build_type=Release \
-    -c tools.system.package_manager:mode=install \       
+    -c tools.system.package_manager:mode=install \
     --build=missing
 
-cmake -S . -B build/Release  \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DSANITIZE=OFF \
-    -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake
+cmake --preset conan-release
 
 cmake --build build/Release
 ```
@@ -71,5 +74,5 @@ cmake --build build/Release
 Запуск:
 
 ```bash
-./build/WheelSimulator
+build/Release/WheelSimulator
 ```

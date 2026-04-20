@@ -1,11 +1,11 @@
 [requires]
-glfw/3.4
-glad/2.0.8
-glm/1.0.1
+bullet3/3.25
 eigen/5.0.1
+glad/2.0.8
+glfw/3.4
+glm/1.0.1
 imgui/1.92.5
 implot/0.17
-bullet3/3.25
 
 [generators]
 CMakeDeps
