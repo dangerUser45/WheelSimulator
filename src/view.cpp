@@ -106,7 +106,6 @@ void View::InitImGui()
     GLuint preview_texture = stb::LoadTexture(preview.c_str(),
         prev_img_.width, prev_img_.heigth);
 
-    std::cerr << "load preview status: " << preview_texture << std::endl;
     if(!preview_texture) {
         // throw std::runtime_error("Error: preview texture didn't load\n");
         //TODO обработать
