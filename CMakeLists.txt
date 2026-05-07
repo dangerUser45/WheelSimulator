@@ -77,7 +77,7 @@ else()
 endif()
 
 target_compile_definitions(WheelSimulator PRIVATE
-    PRESETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/presets/"
+    PRESETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/preset/"
 )
 
 #-------------------------------------------------------------------------------

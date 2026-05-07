@@ -10,7 +10,7 @@ namespace {
 
 [[nodiscard]] bool LoadFont(ImGuiIO& io, const ImFontConfig& config, const ImWchar* glyph_ranges)
 {
-    std::string font_path = std::string(PRESETS_PATH) + "fonts/geist_bold.ttf";
+    std::string font_path = std::string(PRESETS_PATH) + "font/geist_bold.ttf";
      if(io.Fonts->AddFontFromFileTTF(font_path.c_str(), ui::BASE_FONT_SIZE, &config, glyph_ranges) != nullptr)
         return true;
 
