@@ -6,13 +6,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(SANITIZE "Enable sanitizers" OFF)
 
-find_package(OpenGL REQUIRED)
+find_package(Bullet REQUIRED CONFIG)
+find_package(Eigen3 REQUIRED CONFIG)
+find_package(glad   REQUIRED CONFIG)
 find_package(glfw3  REQUIRED CONFIG)
 find_package(glm    REQUIRED CONFIG)
-find_package(Eigen3 REQUIRED CONFIG)
 find_package(imgui  REQUIRED CONFIG)
 find_package(implot REQUIRED CONFIG)
-find_package(glad   REQUIRED CONFIG)
+find_package(OpenGL REQUIRED)
 
 #-------------------------------------------------------------------------------
 # Setup imgui/backends
@@ -37,10 +38,11 @@ target_link_libraries(imgui_backends PUBLIC
 # Setup wheel simulator
 #-------------------------------------------------------------------------------
 add_executable(WheelSimulator
-    src/main.cpp
     src/application.cpp
-    src/view.cpp
+    src/main.cpp
+    src/physics.cpp
     src/ui.cpp
+    src/view.cpp
     3rdparty/stb/src/stb_load_image.cpp
 )
 
@@ -52,6 +54,7 @@ target_include_directories(WheelSimulator PRIVATE
 )
 
 target_link_libraries(WheelSimulator PRIVATE
+    Bullet::Bullet
     Eigen3::Eigen
     glad::glad
     glfw
