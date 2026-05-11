@@ -38,15 +38,24 @@ target_link_libraries(imgui_backends PUBLIC
 # Setup wheel simulator
 #-------------------------------------------------------------------------------
 add_executable(WheelSimulator
-    src/application.cpp
     src/main.cpp
-    src/physics.cpp
-    src/ui.cpp
-    src/view.cpp
+    
+    src/control/application.cpp
+    src/control/sim_controller.cpp
+    src/control/ui_controller.cpp
+    src/control/window_controller.cpp
+    
+    src/physics/physics.cpp
+    src/physics/phys_obj_view.cpp
+    
+    src/render/sim_render.cpp
+    src/render/ui_impl.cpp
+    src/render/ui_render.cpp
+    
     3rdparty/stb/src/stb_load_image.cpp
 )
 
-target_compile_features(WheelSimulator PRIVATE cxx_std_20)
+target_compile_features(WheelSimulator PRIVATE cxx_std_23)
 
 target_include_directories(WheelSimulator PRIVATE
     include

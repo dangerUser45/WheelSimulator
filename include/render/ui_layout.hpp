@@ -1,23 +1,11 @@
 #pragma once
 
-#include <glad/gl.h>
-
 #include <imgui.h>
 
-#include "view.hpp"
-
-namespace whsim::ui {
-
-void ConfigureImGui();
-void ConfigureImGuiFont();
-void DrawPreviewImage(const PreviewImage& preview_image);
-void DrawMenu(MenuCond& menu_cond, GLuint& texture);
-void DrawSimulation();
-void DrawSettings();
-void DrawGraphics();
+namespace whsim::UILayout {
 
 inline constexpr int WINDOW_WIDTH      = 1280;
-inline constexpr int WINDOW_HEIGTH     = 720;
+inline constexpr int WINDOW_HEIGHT     = 720;
 inline constexpr int MIN_WINDOW_WIDTH  = 800;
 inline constexpr int MIN_WINDOW_HEIGTH = 600;
 
@@ -33,7 +21,6 @@ inline constexpr size_t NUM_BUTTONS = 3;
 inline constexpr float  LEFT_PANEL_WIDTH = 150.0f;
 inline constexpr ImVec2 LEFT_PANEL_PADDING {20.0f, 0.0f};
 inline constexpr ImVec2 LEFT_PANEL_ITEM_SPACING {0.0f, 12.0f};
-// inline constexpr float  LEFT_PANEL_TOP_SPACER = 300.0f;
 
 inline constexpr ImVec4 LEFT_PANEL_BG_COLOR     {17.0f / 255.0f, 17.0f / 255.0f, 19.0f / 255.0f, 1.00f};
 inline constexpr ImVec4 LEFT_PANEL_BORDER_COLOR {36.0f / 255.0f, 38.0f / 255.0f, 43.0f / 255.0f, 1.00f};
@@ -64,6 +51,17 @@ inline constexpr float MENU_HEADER_TEXT_MARGIN  = 50.0f;
 
 inline constexpr float SIM_RECT_ROUNDING = 10.0f;
 
+inline constexpr ImVec2 SIMULATION_BUTTON_SIZE {LEFT_PANEL_WIDTH - 32.0f, 42.0f};
+inline constexpr float SIMULATION_BUTTON_ROUNDING = 9.0f;
+inline constexpr float SIMULATION_TO_SECTION_SPACING = 100.0f;
+
+inline constexpr ImU32 SIMULATION_BUTTON_BG_PACKED = IM_COL32(24, 27, 32, 255);
+inline constexpr ImU32 SIMULATION_BUTTON_HOVER_BG_PACKED = IM_COL32(34, 38, 45, 255);
+inline constexpr ImU32 SIMULATION_BUTTON_BORDER_PACKED = IM_COL32(52, 58, 68, 255);
+inline constexpr ImU32 SIMULATION_BUTTON_TEXT_PACKED = IM_COL32(184, 190, 201, 255);
+inline constexpr ImU32 SIMULATION_PAUSE_ACCENT_PACKED = IM_COL32(255, 191, 71, 255);
+inline constexpr ImU32 SIMULATION_PLAY_ACCENT_PACKED = IM_COL32(61, 220, 151, 255);
+inline constexpr ImU32 SIMULATION_RESET_ACCENT_PACKED = IM_COL32(255, 105, 97, 255);
 
 inline constexpr ImGuiWindowFlags IMGUI_FIXED_WINDOW_FLAGS =
     ImGuiWindowFlags_NoDecoration |
@@ -82,4 +80,4 @@ inline constexpr ImGuiWindowFlags IMGUI_CONTENT_WINDOW_FLAGS =
     ImGuiWindowFlags_NoBringToFrontOnFocus |
     ImGuiWindowFlags_NoNavFocus;
 
-} // namespace whsim::ui
+} // namespace whsim::UILayout
