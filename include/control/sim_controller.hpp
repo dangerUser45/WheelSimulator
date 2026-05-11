@@ -5,6 +5,8 @@
     #define GLFW_INCLUDED
 #endif
 
+#include "control/ui_controller.hpp"
+
 namespace whsim {
 
 class SimController final {
@@ -18,7 +20,7 @@ public:
     [[nodiscard]] bool IsStopped() const noexcept;
     [[nodiscard]] bool IsReseted() const noexcept;
 
-    [[nodiscard]] bool ShouldStepSimulation() const noexcept;
+    [[nodiscard]] bool ShouldStepSimulation(const MenuCond&) const noexcept;
     [[nodiscard]] bool RequestReset() noexcept;
 
     void SetStopFlag(bool new_stop_flag) noexcept;

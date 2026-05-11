@@ -29,7 +29,7 @@ void Application::RunLoop()
         window_controller_.ProcessInput();
 
         auto dt = DeltaTime(previous_time);
-        if (sim_controller_.ShouldStepSimulation())
+        if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond()))
             physics_.Step(dt);
         
         sim_render_.Render();

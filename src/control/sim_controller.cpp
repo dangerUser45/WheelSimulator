@@ -14,9 +14,9 @@ bool SimController::IsReseted() const noexcept
     return is_requested_reset_;
 }
 
-bool SimController::ShouldStepSimulation() const noexcept
+bool SimController::ShouldStepSimulation(const MenuCond& menu_cond) const noexcept
 {
-    if(!is_stopped_ /* && active menu::Simulation*/) return true; //FIXME доделать
+    if((!is_stopped_) && (menu_cond == MenuCond::SIMULATION)) return true;
     return false;
 }
 
