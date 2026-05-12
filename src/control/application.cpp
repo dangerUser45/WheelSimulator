@@ -1,6 +1,8 @@
 #include <chrono>
+#include <memory>
 
 #include "control/application.hpp"
+#include "physics/phys_obj_view.hpp"
 
 namespace whsim {
 
@@ -19,6 +21,17 @@ float DeltaTime(auto& previous_time)
 
 }
 
+Application::Application() :
+    physics_(std::make_unique<Physics>()),
+    phys_obj_view_(std::make_unique<PhysObjView>(*physics_))
+{}
+
+void Application::ResetSimulation()
+{
+    physics_ = std::make_unique<Physics>();
+    phys_obj_view_ = std::make_unique<PhysObjView>(*physics_);
+}
+
 void Application::RunLoop()
 {
     auto previous_time = Clock::now();
@@ -30,13 +43,26 @@ void Application::RunLoop()
 
         auto dt = DeltaTime(previous_time);
         if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond()))
-            physics_.Step(dt);
+            physics_->Step(dt);
+
+        phys_obj_view_->Update();
+        auto [sim_width, sim_height] =
+            SimulationTextureSize(window_controller_.Window());
+        const GLuint sim_texture = sim_render_.Render(
+            phys_obj_view_->PhysObjects(),
+            sim_width,
+            sim_height
+        );
         
-        sim_render_.Render();
-        ui_render_.Render(window_controller_.Window(), ui_controller_, sim_controller_);
+        ui_render_.Render(
+            window_controller_.Window(),
+            ui_controller_,
+            sim_controller_,
+            sim_texture
+        );
 
         if (sim_controller_.RequestReset()) {
-            physics_.ResetSimulation();
+            this->ResetSimulation();
         }
     }
 }

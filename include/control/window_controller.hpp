@@ -23,7 +23,7 @@ public:
     void ProcessInput() const;
     [[nodiscard]] bool ShouldClose() const;
 
-    GLFWwindow* Window() const noexcept;
+    [[nodiscard]] GLFWwindow* Window() const noexcept;
 };
 
 } // namespace whsim

@@ -70,7 +70,7 @@ void Physics::CreateTerrain()
 
     for(std::size_t length_idx = 0; length_idx < init_length_terrain; ++length_idx)
         for(std::size_t width_idx = 0; width_idx < init_width_terrain; ++width_idx) {
-            float height = 0;
+            float height = 0.00f;
 
             // height = std::min();
             terrain_heights_[length_idx * init_width_terrain + width_idx] = height;
@@ -122,7 +122,9 @@ void Physics::CreateWheel(CarSide side)
     );
 
     btVector3 inertia {0.0f, 0.0f, 0.0f};
-    wheel_shape->calculateLocalInertia(wheel_mass, inertia); // TODO исправить инерцию с равномерно распределённой на более реалистичную
+
+    // TODO исправить инерцию с равномерно распределённой на более реалистичную
+    wheel_shape->calculateLocalInertia(wheel_mass, inertia);
 
     btTransform start_transform;
     start_transform.setIdentity();
@@ -162,36 +164,10 @@ void Physics::ApplyWheelTorque(btVector3& torque_vec, CarSide side)
 
 void Physics::Step(float dt)
 {   
-    btVector3 torque_vec{0.0f, 20.0f, 0.0f};
+    btVector3 torque_vec{5.0f, 0.0f, 0.0f};
     ApplyWheelTorque(torque_vec, CarSide::LF);
 
     world_->stepSimulation(dt, 8, 1.0f / 60.0f);
-}
-
-void Physics::ResetSimulation()
-{
-    // if (wheel_body_ == nullptr) {
-    //     return;
-    // }
-
-    // btTransform start_transform;
-    // start_transform.setIdentity();
-    // start_transform.setOrigin(btVector3(0.0f, 0.0f, WHEEL_RADIUS));
-
-    // wheel_body_->setWorldTransform(start_transform);
-    // wheel_body_->setCenterOfMassTransform(start_transform);
-    // wheel_body_->setInterpolationWorldTransform(start_transform);
-
-    // if (wheel_body_->getMotionState() != nullptr) {
-    //     wheel_body_->getMotionState()->setWorldTransform(start_transform);
-    // }
-
-    // wheel_body_->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
-    // wheel_body_->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
-    // wheel_body_->clearForces();
-    // wheel_body_->activate(true);
-
-    // world_->updateSingleAabb(wheel_body_);
 }
 
 const std::vector<Physics::BulletObj>& Physics::Wheels() const noexcept { return wheels_; }

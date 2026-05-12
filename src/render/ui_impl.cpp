@@ -348,107 +348,12 @@ void DrawSimulation(const GLuint simulation_texture)
 
 void DrawSettings()
 {
-    auto draw_settings = [](auto, ImVec2, ImVec2) {
-        static bool enable_simulation = true;
-        static bool show_collision_mesh = false;
-        static bool auto_center_camera = true;
-        static float wheel_radius = 0.34f;
-        static float tire_pressure = 2.2f;
-        static float suspension_stiffness = 16.0f;
-        static float damping_ratio = 0.55f;
-        static float camber_angles[2] = {-1.0f, 1.0f};
-        static int solver_iterations = 12;
-        static int drive_mode = 1;
-        static int quality_mode = 2;
-        static float tune_factors[8] = {
-            0.82f, 0.64f, 0.71f, 0.58f,
-            0.67f, 0.49f, 0.76f, 0.61f
-        };
-        static constexpr const char* drive_modes[] = {
-            "Comfort",
-            "Sport",
-            "Track"
-        };
 
-        const float child_pos_y = ImGui::GetCursorPosY() + UILayout::CONTENT_PANEL_MARGIN;
-        ImGui::SetCursorPos(ImVec2(UILayout::CONTENT_PANEL_MARGIN, child_pos_y));
-
-        const ImVec2 child_size(
-            ImGui::GetContentRegionAvail().x - UILayout::CONTENT_PANEL_MARGIN,
-            ImGui::GetContentRegionAvail().y - UILayout::CONTENT_PANEL_MARGIN);
-
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, UILayout::LEFT_PANEL_BG_COLOR);
-        ImGui::PushStyleColor(ImGuiCol_Border, UILayout::LEFT_PANEL_BORDER_COLOR);
-        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, UILayout::SIM_RECT_ROUNDING);
-        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20.0f, 20.0f));
-
-        ImGui::BeginChild(
-            "SettingsPanel",
-            child_size,
-            ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding,
-            ImGuiWindowFlags_None);
-
-        ImGui::TextUnformatted("General");
-        ImGui::Separator();
-        ImGui::Checkbox("Enable simulation", &enable_simulation);
-        ImGui::Checkbox("Show collision mesh", &show_collision_mesh);
-        ImGui::Checkbox("Auto-center camera", &auto_center_camera);
-        ImGui::SliderFloat("Wheel radius", &wheel_radius, 0.20f, 0.80f, "%.2f m");
-        ImGui::SliderInt("Solver iterations", &solver_iterations, 4, 64);
-
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Dynamics");
-        ImGui::Separator();
-        ImGui::DragFloat("Tire pressure", &tire_pressure, 0.05f, 1.0f, 3.5f, "%.2f bar");
-        ImGui::DragFloat("Suspension stiffness", &suspension_stiffness, 0.25f, 1.0f, 30.0f, "%.2f");
-        ImGui::SliderFloat("Damping ratio", &damping_ratio, 0.0f, 1.0f, "%.2f");
-        ImGui::DragFloat2("Camber", camber_angles, 0.1f, -10.0f, 10.0f, "%.1f deg");
-
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Modes");
-        ImGui::Separator();
-        ImGui::Combo("Drive mode", &drive_mode, drive_modes, IM_ARRAYSIZE(drive_modes));
-        ImGui::RadioButton("Low", &quality_mode, 0);
-        ImGui::SameLine();
-        ImGui::RadioButton("Medium", &quality_mode, 1);
-        ImGui::SameLine();
-        ImGui::RadioButton("High", &quality_mode, 2);
-
-        if (ImGui::Button("Reset tuning")) {
-            wheel_radius = 0.34f;
-            tire_pressure = 2.2f;
-            suspension_stiffness = 16.0f;
-            damping_ratio = 0.55f;
-            solver_iterations = 12;
-            camber_angles[0] = -1.0f;
-            camber_angles[1] = 1.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Apply track preset")) {
-            drive_mode = 2;
-            quality_mode = 2;
-            tire_pressure = 2.6f;
-            suspension_stiffness = 22.0f;
-            damping_ratio = 0.70f;
-        }
-
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Advanced");
-        ImGui::Separator();
-        for (int i = 0; i < IM_ARRAYSIZE(tune_factors); ++i) {
-            ImGui::PushID(i);
-            const std::string label = "Tune factor " + std::to_string(i + 1);
-            ImGui::SliderFloat(label.c_str(), &tune_factors[i], 0.0f, 1.0f, "%.2f");
-            ImGui::PopID();
-        }
-
-        ImGui::EndChild();
-
-        ImGui::PopStyleVar(3);
-        ImGui::PopStyleColor(2);
+    auto draw_settings = [](auto draw, ImVec2 pos_window, ImVec2 size_window){
+        (void)draw;
+        (void)pos_window;
+        (void)size_window;
     };
-
     DrawSection(draw_settings, "Settings");
 }
 

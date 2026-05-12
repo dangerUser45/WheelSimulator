@@ -1,12 +1,14 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
+#include <vector>
 
 #include "physics/physics.hpp"
 
 namespace whsim {
 
-enum class PhysObjKind : uint8_t {
+enum class PhysObjKind : std::uint8_t {
     Wheel,
     Suspension,
     CarBody,
@@ -28,7 +30,9 @@ private:
 public:
     PhysObjView(const Physics& physics);
 
-    std::vector<PhysObj>& PhysObjects() const noexcept;
+    void Update();
+
+    [[nodiscard]] const std::vector<PhysObj>& PhysObjects() const noexcept;
 };
 
 } // namespace whsim

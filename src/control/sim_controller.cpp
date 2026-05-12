@@ -2,8 +2,6 @@
 
 namespace whsim {
 
-GLuint SimController::SimTexture() const noexcept { return sim_texture_; }
-
 bool SimController::IsStopped() const noexcept
 {
     return is_stopped_;

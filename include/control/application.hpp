@@ -1,8 +1,8 @@
 #pragma once
 
 #include "control/sim_controller.hpp"
-#include "control/window_controller.hpp"
 #include "control/ui_controller.hpp"
+#include "control/window_controller.hpp"
 
 #include "physics/phys_obj_view.hpp"
 #include "physics/physics.hpp"
@@ -23,10 +23,13 @@ private:
     UIRender ui_render_{window_controller_.Window()};
     SimRender sim_render_{};
     
-    Physics physics_{};
-    PhysObjView phys_obj_view_{physics_};
+    std::unique_ptr<Physics> physics_{};
+    std::unique_ptr<PhysObjView> phys_obj_view_{};
 
 public:
+    Application();
+
+    void ResetSimulation();
     void RunLoop();
 };
 

@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <glad/gl.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -32,15 +34,19 @@ UIRender::~UIRender()
 }
 
 void UIRender::Render(GLFWwindow* window, UIController& ui_ctrl,
-                      SimController& sim_ctrl) const
+                      SimController& sim_ctrl, GLuint sim_texture) const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    DrawUI(ui_ctrl, sim_ctrl);
+    DrawUI(ui_ctrl, sim_ctrl, sim_texture);
 
     ImGui::Render();
+    int display_width = 0;
+    int display_height = 0;
+    glfwGetFramebufferSize(window, &display_width, &display_height);
+    glViewport(0, 0, display_width, display_height);
     glClearColor(UILayout::CLEAR_COLOR_RED,
                  UILayout::CLEAR_COLOR_GREEN,
                  UILayout::CLEAR_COLOR_BLUE,
@@ -52,7 +58,8 @@ void UIRender::Render(GLFWwindow* window, UIController& ui_ctrl,
 }
 
 void UIRender::DrawUI(UIController& ui_ctrl,
-                      SimController& sim_ctrl) const
+                      SimController& sim_ctrl,
+                      GLuint sim_texture) const
 {
     UIImpl::DrawMenu(ui_ctrl, sim_ctrl);
 
@@ -66,11 +73,25 @@ void UIRender::DrawUI(UIController& ui_ctrl,
             UIImpl::DrawSettings(); break;
         
         case MenuCond::SIMULATION:
-            UIImpl::DrawSimulation(sim_ctrl.SimTexture()); break;
+            UIImpl::DrawSimulation(sim_texture); break;
         
         case MenuCond::GRAPHICS:
             UIImpl::DrawGraphics(); break;
     }
+}
+
+std::pair<int, int> SimulationTextureSize(GLFWwindow* window)
+{
+    int width = UILayout::WINDOW_WIDTH;
+    int height = UILayout::WINDOW_HEIGHT;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    const int sim_width = width - static_cast<int>(UILayout::LEFT_PANEL_WIDTH
+        + UILayout::CONTENT_PANEL_MARGIN * 2.0f);
+    const int sim_height = height - static_cast<int>(UILayout::SIMULATION_PANEL_MARGIN
+        + UILayout::CONTENT_PANEL_MARGIN);
+
+    return {sim_width, sim_height};
 }
 
 } // namespace whsim

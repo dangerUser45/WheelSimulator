@@ -27,8 +27,8 @@ public:
     UIController();
     ~UIController();
 
-    const PreviewImage& GetPreviewImage() const noexcept;
-    const MenuCond& GetMenuCond() const noexcept;
+    [[nodiscard]] const PreviewImage& GetPreviewImage() const noexcept;
+    [[nodiscard]] const MenuCond& GetMenuCond() const noexcept;
 
     void SetMenuCond(const MenuCond menu_cond) noexcept;
 };

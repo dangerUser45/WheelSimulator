@@ -48,6 +48,7 @@ add_executable(WheelSimulator
     src/physics/physics.cpp
     src/physics/phys_obj_view.cpp
     
+    src/render/mesh.cpp
     src/render/sim_render.cpp
     src/render/ui_impl.cpp
     src/render/ui_render.cpp
@@ -90,6 +91,7 @@ endif()
 
 target_compile_definitions(WheelSimulator PRIVATE
     PRESETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/preset/"
+    SHADERS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/shaders/"
 )
 
 #-------------------------------------------------------------------------------
