@@ -27,13 +27,13 @@ float DeltaTime(auto& previous_time)
 }
 
 Application::Application() :
-    physics_(std::make_unique<Physics>()),
+    physics_(std::make_unique<Physics>(settings_)),
     phys_obj_view_(std::make_unique<PhysObjView>(*physics_))
 {}
 
 void Application::ResetSimulation()
 {
-    physics_ = std::make_unique<Physics>();
+    physics_ = std::make_unique<Physics>(settings_);
     phys_obj_view_ = std::make_unique<PhysObjView>(*physics_);
 }
 
@@ -92,15 +92,25 @@ void Application::RunLoop()
             sim_width,
             sim_height,
             dt,
-            camera_input_enabled
+            camera_input_enabled,
+            settings_
         );
+
+        settings_.camera.mode = sim_render_.CameraViewMode();
+        const SimulationSettings previous_settings = settings_;
         
         ui_render_.Render(
             window_controller_.Window(),
             ui_controller_,
             sim_controller_,
+            settings_,
             sim_texture
         );
+
+        if (PhysicsSettingsChanged(previous_settings, settings_)) {
+            sim_controller_.SetStopFlag(true);
+            this->ResetSimulation();
+        }
 
         if (sim_controller_.RequestReset()) {
             this->ResetSimulation();

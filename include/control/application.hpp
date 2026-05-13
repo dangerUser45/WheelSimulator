@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "config/simulation_settings.hpp"
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
 #include "control/window_controller.hpp"
@@ -24,6 +25,7 @@ private:
     
     UIRender ui_render_{window_controller_.Window()};
     SimRender sim_render_{};
+    SimulationSettings settings_{};
     
     std::unique_ptr<Physics> physics_{};
     std::unique_ptr<PhysObjView> phys_obj_view_{};

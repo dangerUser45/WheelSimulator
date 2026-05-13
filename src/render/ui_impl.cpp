@@ -7,6 +7,7 @@
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
 
+#include "config/simulation_settings.hpp"
 #include "render/ui_layout.hpp"
 
 namespace whsim::UIImpl {
@@ -377,13 +378,47 @@ void DrawSimulationFullscreen(const GLuint simulation_texture)
     ImGui::PopStyleColor(2);
 }
 
-void DrawSettings()
+void DrawSettings(SimulationSettings& settings)
 {
-
-    auto draw_settings = [](auto draw, ImVec2 pos_window, ImVec2 size_window){
+    auto draw_settings = [&settings](auto draw, ImVec2 pos_window, ImVec2 size_window){
         (void)draw;
         (void)pos_window;
         (void)size_window;
+
+        constexpr float settings_width = 320.0f;
+        const char* camera_modes[] = {"FollowWheel", "Free"};
+        int camera_mode = settings.camera.mode == CameraMode::FollowWheel
+            ? 0
+            : 1;
+
+        ImGui::SetCursorPos(ImVec2(
+            UILayout::CONTENT_PANEL_MARGIN,
+            UILayout::SIMULATION_PANEL_MARGIN));
+
+        ImGui::PushItemWidth(settings_width);
+
+        ImGui::TextUnformatted("Wheel");
+        ImGui::SliderFloat("Radius", &settings.wheel.radius, 0.10f, 1.00f, "%.2f");
+        ImGui::SliderFloat("Width", &settings.wheel.width, 0.05f, 0.50f, "%.2f");
+        ImGui::SliderFloat("Mass", &settings.wheel.mass, 0.10f, 20.00f, "%.2f");
+        ImGui::SliderFloat("Speed", &settings.wheel.target_angular_speed, -40.00f, 40.00f, "%.2f");
+
+        ImGui::Spacing();
+        ImGui::TextUnformatted("Friction");
+        ImGui::SliderFloat("Wheel friction", &settings.wheel.friction, 0.00f, 3.00f, "%.2f");
+        ImGui::SliderFloat("Rolling friction", &settings.wheel.rolling_friction, 0.00f, 0.25f, "%.3f");
+        ImGui::SliderFloat("Spinning friction", &settings.wheel.spinning_friction, 0.00f, 0.25f, "%.3f");
+        ImGui::SliderFloat("Terrain friction", &settings.terrain.friction, 0.00f, 3.00f, "%.2f");
+
+        ImGui::Spacing();
+        ImGui::TextUnformatted("Camera");
+        if (ImGui::Combo("View mode", &camera_mode, camera_modes, 2)) {
+            settings.camera.mode = camera_mode == 0
+                ? CameraMode::FollowWheel
+                : CameraMode::Free;
+        }
+
+        ImGui::PopItemWidth();
     };
     DrawSection(draw_settings, "Settings");
 }

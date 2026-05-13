@@ -33,14 +33,18 @@ UIRender::~UIRender()
     ImGui::DestroyContext();
 }
 
-void UIRender::Render(GLFWwindow* window, UIController& ui_ctrl,
-                      SimController& sim_ctrl, GLuint sim_texture) const
+void UIRender::Render(
+    GLFWwindow* window,
+    UIController& ui_ctrl,
+    SimController& sim_ctrl,
+    SimulationSettings& settings,
+    GLuint sim_texture) const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    DrawUI(ui_ctrl, sim_ctrl, sim_texture);
+    DrawUI(ui_ctrl, sim_ctrl, settings, sim_texture);
 
     ImGui::Render();
     int display_width = 0;
@@ -59,6 +63,7 @@ void UIRender::Render(GLFWwindow* window, UIController& ui_ctrl,
 
 void UIRender::DrawUI(UIController& ui_ctrl,
                       SimController& sim_ctrl,
+                      SimulationSettings& settings,
                       GLuint sim_texture) const
 {
     if (ui_ctrl.IsSimulationFullscreen() &&
@@ -76,7 +81,7 @@ void UIRender::DrawUI(UIController& ui_ctrl,
             break;
         }
         case MenuCond::SETTINGS:
-            UIImpl::DrawSettings(); break;
+            UIImpl::DrawSettings(settings); break;
         
         case MenuCond::SIMULATION:
             UIImpl::DrawSimulation(sim_texture); break;

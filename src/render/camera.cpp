@@ -19,18 +19,7 @@ namespace whsim {
 
 namespace {
 
-constexpr float WORLD_UP_Z = 1.0f;
-constexpr glm::vec3 WORLD_UP{0.0f, 0.0f, WORLD_UP_Z};
-
-constexpr float PI = 3.14159265358979323846f;
-constexpr float MIN_PITCH = -PI * 0.45f;
-constexpr float MAX_PITCH = PI * 0.45f;
-
-constexpr float FOLLOW_DISTANCE = 4.5f;
-constexpr float FREE_MOVE_SPEED = 5.0f;
-constexpr float KEY_LOOK_SPEED = 1.8f;
-constexpr float MOUSE_LOOK_SPEED = 0.003f;
-constexpr float MAX_FRAME_TIME = 0.1f;
+constexpr glm::vec3 WORLD_UP{0.0f, 0.0f, 1.0f};
 
 bool KeyPressed(GLFWwindow* window, int key)
 {
@@ -67,6 +56,32 @@ bool TryFindWheelTarget(
 
 } // namespace
 
+Camera::Camera()
+{
+    settings_ = CameraSettings{};
+    mode_ = settings_.mode;
+    position_ = glm::vec3{
+        settings_.start_x,
+        settings_.start_y,
+        settings_.start_z
+    };
+    follow_target_ = glm::vec3{
+        settings_.target_x,
+        settings_.target_y,
+        settings_.target_z
+    };
+    yaw_ = settings_.yaw;
+    pitch_ = settings_.pitch;
+}
+
+void Camera::ApplySettings(const CameraSettings& settings)
+{
+    const CameraMode requested_mode = settings.mode;
+    settings_ = settings;
+    SetMode(requested_mode);
+    pitch_ = std::clamp(pitch_, settings_.min_pitch, settings_.max_pitch);
+}
+
 void Camera::Update(
     GLFWwindow* window,
     const std::vector<PhysObj>& objects,
@@ -77,7 +92,7 @@ void Camera::Update(
         return;
     }
 
-    const float frame_time = std::clamp(dt, 0.0f, MAX_FRAME_TIME);
+    const float frame_time = std::clamp(dt, 0.0f, settings_.max_frame_time);
 
     RefreshFollowTarget(objects);
 
@@ -147,19 +162,19 @@ void Camera::HandleModeSwitch(GLFWwindow* window)
 void Camera::HandleLookInput(GLFWwindow* window, float dt)
 {
     if (KeyPressed(window, GLFW_KEY_LEFT)) {
-        yaw_ += KEY_LOOK_SPEED * dt;
+        yaw_ += settings_.key_look_speed * dt;
     }
 
     if (KeyPressed(window, GLFW_KEY_RIGHT)) {
-        yaw_ -= KEY_LOOK_SPEED * dt;
+        yaw_ -= settings_.key_look_speed * dt;
     }
 
     if (KeyPressed(window, GLFW_KEY_UP)) {
-        pitch_ += KEY_LOOK_SPEED * dt;
+        pitch_ += settings_.key_look_speed * dt;
     }
 
     if (KeyPressed(window, GLFW_KEY_DOWN)) {
-        pitch_ -= KEY_LOOK_SPEED * dt;
+        pitch_ -= settings_.key_look_speed * dt;
     }
 
     if (LeftMousePressed(window)) {
@@ -171,8 +186,8 @@ void Camera::HandleLookInput(GLFWwindow* window, float dt)
             const auto delta_x = static_cast<float>(mouse_x - previous_mouse_x_);
             const auto delta_y = static_cast<float>(mouse_y - previous_mouse_y_);
 
-            yaw_ -= delta_x * MOUSE_LOOK_SPEED;
-            pitch_ -= delta_y * MOUSE_LOOK_SPEED;
+            yaw_ -= delta_x * settings_.mouse_look_speed;
+            pitch_ -= delta_y * settings_.mouse_look_speed;
         }
 
         previous_mouse_x_ = mouse_x;
@@ -182,7 +197,7 @@ void Camera::HandleLookInput(GLFWwindow* window, float dt)
         right_mouse_pressed_ = false;
     }
 
-    pitch_ = std::clamp(pitch_, MIN_PITCH, MAX_PITCH);
+    pitch_ = std::clamp(pitch_, settings_.min_pitch, settings_.max_pitch);
 }
 
 void Camera::HandleFreeMovement(GLFWwindow* window, float dt)
@@ -216,7 +231,8 @@ void Camera::HandleFreeMovement(GLFWwindow* window, float dt)
     }
 
     if (glm::dot(movement, movement) > 0.0f) {
-        position_ += glm::normalize(movement) * FREE_MOVE_SPEED * dt;
+        position_ += glm::normalize(movement) *
+            settings_.free_move_speed * dt;
     }
 }
 
@@ -269,7 +285,7 @@ glm::vec3 Camera::Right() const
 
 glm::vec3 Camera::FollowPosition() const
 {
-    return follow_target_ - Forward() * FOLLOW_DISTANCE;
+    return follow_target_ - Forward() * settings_.follow_distance;
 }
 
 glm::vec3 Camera::CurrentPosition() const

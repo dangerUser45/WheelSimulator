@@ -454,12 +454,12 @@ void AddWheelCaps(
     );
 }
 
-Mesh CreateWheelMesh()
+Mesh CreateWheelMesh(const WheelSettings& settings)
 {
-    constexpr float radius = 0.35f;
-    constexpr float width = 0.12f;
+    const float radius = settings.radius;
+    const float width = settings.width;
     constexpr int segments = 48;
-    constexpr float half_width = width * 0.5f;
+    const float half_width = width * 0.5f;
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -591,14 +591,16 @@ SimRender::~SimRender()
     }
 }
 
-void SimRender::Initialize()
+void SimRender::Initialize(const SimulationSettings& settings)
 {
     if (initialized_) {
         return;
     }
 
     InitializeShader();
-    InitializeMeshes();
+    InitializeMeshes(settings);
+    settings_ = settings;
+    camera_.ApplySettings(settings_.camera);
 
     initialized_ = true;
 }
@@ -633,11 +635,22 @@ void SimRender::InitializeUniformLocations()
         GetUniformLocationChecked(shader_program_, "uLightDir");
 }
 
-void SimRender::InitializeMeshes()
+void SimRender::InitializeMeshes(const SimulationSettings& settings)
 {
     terrain_mesh_ = std::make_unique<Mesh>(CreateTerrainMesh());
-    wheel_mesh_ = std::make_unique<Mesh>(CreateWheelMesh());
+    wheel_mesh_ = std::make_unique<Mesh>(CreateWheelMesh(settings.wheel));
     box_mesh_ = std::make_unique<Mesh>(CreateBoxMesh());
+}
+
+void SimRender::RefreshSettings(const SimulationSettings& settings)
+{
+    camera_.ApplySettings(settings.camera);
+
+    if (WheelMeshSettingsChanged(settings_, settings)) {
+        wheel_mesh_ = std::make_unique<Mesh>(CreateWheelMesh(settings.wheel));
+    }
+
+    settings_ = settings;
 }
 
 void SimRender::DestroyFramebufferResources()
@@ -811,15 +824,17 @@ unsigned int SimRender::Render(
     int width,
     int height,
     float dt,
-    bool camera_input_enabled)
+    bool camera_input_enabled,
+    const SimulationSettings& settings)
 {
     if (width <= 0 || height <= 0) {
         return 0;
     }
 
+    Initialize(settings);
+    RefreshSettings(settings);
     camera_.Update(window, objects, dt, camera_input_enabled);
 
-    Initialize();
     EnsureFramebuffer(width, height);
 
     BeginRenderToTexture(width, height);
@@ -873,6 +888,11 @@ void SimRender::DrawObject(const PhysObj& object) const
 unsigned int SimRender::SimTexture() const noexcept
 {
     return sim_texture_;
+}
+
+CameraMode SimRender::CameraViewMode() const noexcept
+{
+    return camera_.Mode();
 }
 
 } // namespace whsim

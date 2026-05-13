@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "config/simulation_settings.hpp"
 #include "render/camera.hpp"
 
 struct GLFWwindow;
@@ -34,14 +35,16 @@ private:
     int texture_height_ = 0;
 
     Camera camera_{};
+    SimulationSettings settings_{};
 
     bool initialized_ = false;
 
 private:
-    void Initialize();
-    void InitializeMeshes();
+    void Initialize(const SimulationSettings& settings);
+    void InitializeMeshes(const SimulationSettings& settings);
     void InitializeShader();
     void InitializeUniformLocations();
+    void RefreshSettings(const SimulationSettings& settings);
 
     void EnsureFramebuffer(int width, int height);
     void DestroyFramebufferResources();
@@ -77,9 +80,11 @@ public:
         int width,
         int height,
         float dt,
-        bool camera_input_enabled);
+        bool camera_input_enabled,
+        const SimulationSettings& settings);
 
     [[nodiscard]] unsigned int SimTexture() const noexcept;
+    [[nodiscard]] CameraMode CameraViewMode() const noexcept;
 };
 
 } // namespace whsim

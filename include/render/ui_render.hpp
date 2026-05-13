@@ -9,6 +9,7 @@
 
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
+#include "config/simulation_settings.hpp"
 
 namespace whsim {
 
@@ -18,9 +19,11 @@ namespace whsim {
 
 class UIRender final {
 private:
-    void DrawUI(UIController& ui_ctrl,
-                SimController& sim_ctrl,
-                GLuint sim_texture) const;
+    void DrawUI(
+        UIController& ui_ctrl,
+        SimController& sim_ctrl,
+        SimulationSettings& settings,
+        GLuint sim_texture) const;
 
 public:
     UIRender(GLFWwindow* window);
@@ -31,8 +34,12 @@ public:
     UIRender(UIRender&&) = delete;
     UIRender& operator=(UIRender&&) = delete;
 
-    void Render(GLFWwindow* window, UIController& ui_ctrl,
-                SimController& sim_ctrl, GLuint sim_texture) const;
+    void Render(
+        GLFWwindow* window,
+        UIController& ui_ctrl,
+        SimController& sim_ctrl,
+        SimulationSettings& settings,
+        GLuint sim_texture) const;
 };
 
 } // namespace whsim

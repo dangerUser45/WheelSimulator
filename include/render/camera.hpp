@@ -1,10 +1,11 @@
 #pragma once
 
-#include <cstdint>
 #include <vector>
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+
+#include "config/simulation_settings.hpp"
 
 struct GLFWwindow;
 
@@ -12,20 +13,16 @@ namespace whsim {
 
 struct PhysObj;
 
-enum class CameraMode : std::uint8_t {
-    FollowWheel,
-    Free
-};
-
 class Camera final {
 private:
-    CameraMode mode_ = CameraMode::FollowWheel;
+    CameraSettings settings_{};
+    CameraMode mode_{};
 
-    glm::vec3 position_{0.0f, -4.5f, 2.0f};
-    glm::vec3 follow_target_{0.0f, 0.0f, 0.35f};
+    glm::vec3 position_{};
+    glm::vec3 follow_target_{};
 
-    float yaw_ = 1.57079632679f;
-    float pitch_ = -0.35f;
+    float yaw_ = 0.0f;
+    float pitch_ = 0.0f;
 
     bool f2_pressed_ = false;
     bool right_mouse_pressed_ = false;
@@ -47,6 +44,10 @@ private:
     [[nodiscard]] glm::vec3 CurrentPosition() const;
 
 public:
+    Camera();
+
+    void ApplySettings(const CameraSettings& settings);
+
     void Update(
         GLFWwindow* window,
         const std::vector<PhysObj>& objects,

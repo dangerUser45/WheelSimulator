@@ -17,7 +17,7 @@ void RemoveRigidBody(btDiscreteDynamicsWorld& world,
 
 }
 
-Physics::Physics() :
+Physics::Physics(const SimulationSettings& settings) :
     collision_config_(std::make_unique<btDefaultCollisionConfiguration>()),
     dispatcher_(std::make_unique<btCollisionDispatcher>(collision_config_.get())),
     broadphase_(std::make_unique<btDbvtBroadphase>()),
@@ -29,6 +29,7 @@ Physics::Physics() :
         collision_config_.get()
     )),
     terrain_heights_{},
+    settings_(settings),
     wheels_(4),
     suspensions_(4),
     car_body_{},
@@ -60,14 +61,14 @@ void Physics::CreateTerrain()
     //         |                 |
     //         ↓_________________|
 
-    constexpr std::size_t init_width_terrain  = 128;
-    constexpr std::size_t init_length_terrain = 128;
+    const auto init_width_terrain =
+        static_cast<std::size_t>(settings_.terrain.samples_x);
+
+    const auto init_length_terrain =
+        static_cast<std::size_t>(settings_.terrain.samples_y);
     
     terrain_heights_.resize(init_width_terrain * init_length_terrain);
     
-    constexpr float min_height = -20.0f;
-    constexpr float max_height = 20.0f;
-
     for(std::size_t length_idx = 0; length_idx < init_length_terrain; ++length_idx)
         for(std::size_t width_idx = 0; width_idx < init_width_terrain; ++width_idx) {
             float height = 0.00f;
@@ -80,12 +81,17 @@ void Physics::CreateTerrain()
         init_width_terrain, init_length_terrain,
         terrain_heights_.data(),
         1.0f,                       //height scale: with scale=1.0f => 1metr = 1.0f
-        min_height, max_height,
+        settings_.terrain.min_height,
+        settings_.terrain.max_height,
         2,                          // height axis: 0-X, 1-Y, 2-Z 
         PHY_FLOAT,                  // floating data 
         false                       // flipQuadEdges
     );
-    terrain_shape->setLocalScaling(btVector3(0.2f, 0.2f, 0.2f)); // TODO возможно стоит поменять
+    terrain_shape->setLocalScaling(btVector3(
+        settings_.terrain.cell_size,
+        settings_.terrain.cell_size,
+        1.0f
+    ));
 
     btTransform ground_transform{};
     ground_transform.setIdentity();
@@ -103,8 +109,7 @@ void Physics::CreateTerrain()
 
     auto terrain_body = std::make_unique<btRigidBody>(info);
 
-    constexpr float terrain_friction = 1.0f;
-    terrain_body->setFriction(terrain_friction);
+    terrain_body->setFriction(settings_.terrain.friction);
 
     world_->addRigidBody(terrain_body.get());
 
@@ -113,12 +118,12 @@ void Physics::CreateTerrain()
 
 void Physics::CreateWheel(CarSide side)
 {
-    constexpr float wheel_width  = 0.12f;
-    constexpr float wheel_radius = 0.35f;
-    constexpr float wheel_mass   = 1.00f;
+    const float wheel_width = settings_.wheel.width;
+    const float wheel_radius = settings_.wheel.radius;
+    const float wheel_mass = settings_.wheel.mass;
 
     auto wheel_shape = std::make_unique<btCylinderShapeX>(
-        btVector3{wheel_width * 0.5, wheel_radius, wheel_radius}
+        btVector3{wheel_width * 0.5f, wheel_radius, wheel_radius}
     );
 
     btVector3 inertia {0.0f, 0.0f, 0.0f};
@@ -141,13 +146,9 @@ void Physics::CreateWheel(CarSide side)
 
     auto wheel_body = std::make_unique<btRigidBody>(info);
 
-    constexpr float wheel_friction          = 1.20f;
-    constexpr float wheel_rolling_friction  = 0.02f;
-    constexpr float wheel_spinning_friction = 0.02f;
-
-    wheel_body->setFriction(wheel_friction);
-    wheel_body->setRollingFriction(wheel_rolling_friction);
-    wheel_body->setSpinningFriction(wheel_spinning_friction);
+    wheel_body->setFriction(settings_.wheel.friction);
+    wheel_body->setRollingFriction(settings_.wheel.rolling_friction);
+    wheel_body->setSpinningFriction(settings_.wheel.spinning_friction);
     wheel_body->setDamping(0.02f, 0.05f);
     wheel_body->setActivationState(DISABLE_DEACTIVATION);
 
@@ -157,15 +158,25 @@ void Physics::CreateWheel(CarSide side)
         {std::move(wheel_shape), std::move(motion_state), std::move(wheel_body)};
 }
 
-void Physics::ApplyWheelTorque(btVector3& torque_vec, CarSide side)
+void Physics::ApplyWheelDrive(CarSide side)
 {
-    wheels_[idx(side)].rigid_body->applyTorque(torque_vec);
+    btRigidBody* body = wheels_[idx(side)].rigid_body.get();
+
+    if (body == nullptr) {
+        return;
+    }
+
+    const float current_speed = body->getAngularVelocity().x();
+    const float torque =
+        (settings_.wheel.target_angular_speed - current_speed) *
+        settings_.wheel.drive_torque;
+
+    body->applyTorque(btVector3{torque, 0.0f, 0.0f});
 }
 
 void Physics::Step(float dt)
 {   
-    btVector3 torque_vec{5.0f, 0.0f, 0.0f};
-    ApplyWheelTorque(torque_vec, CarSide::LF);
+    ApplyWheelDrive(CarSide::LF);
 
     world_->stepSimulation(dt, 8, 1.0f / 60.0f);
 }

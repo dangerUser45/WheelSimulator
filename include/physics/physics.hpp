@@ -7,6 +7,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <btBulletDynamicsCommon.h>
 
+#include "config/simulation_settings.hpp"
+
 namespace whsim {
 
 enum class CarSide : std::uint8_t {
@@ -26,7 +28,7 @@ public:
         std::unique_ptr<btRigidBody> rigid_body{};
     };
 
-    Physics();
+    explicit Physics(const SimulationSettings& settings);
     ~Physics();
 
     Physics(const Physics&) = delete;
@@ -51,6 +53,7 @@ private:
     std::unique_ptr<btDiscreteDynamicsWorld> world_;
 
     std::vector<float> terrain_heights_;
+    SimulationSettings settings_;
 
     // какие в целом объекты:
     //      земля (массив высот)
@@ -67,7 +70,7 @@ private:
 
     void CreateTerrain();
     void CreateWheel(CarSide side);
-    void ApplyWheelTorque(btVector3& torque_vec, CarSide side);
+    void ApplyWheelDrive(CarSide side);
 };
 
 } // namespace whsim
