@@ -61,6 +61,12 @@ void UIRender::DrawUI(UIController& ui_ctrl,
                       SimController& sim_ctrl,
                       GLuint sim_texture) const
 {
+    if (ui_ctrl.IsSimulationFullscreen() &&
+        ui_ctrl.GetMenuCond() == MenuCond::SIMULATION) {
+        UIImpl::DrawSimulationFullscreen(sim_texture);
+        return;
+    }
+
     UIImpl::DrawMenu(ui_ctrl, sim_ctrl);
 
     switch(ui_ctrl.GetMenuCond()) {
@@ -80,11 +86,17 @@ void UIRender::DrawUI(UIController& ui_ctrl,
     }
 }
 
-std::pair<int, int> SimulationTextureSize(GLFWwindow* window)
+std::pair<int, int> SimulationTextureSize(
+    GLFWwindow* window,
+    const UIController& ui_ctrl)
 {
     int width = UILayout::WINDOW_WIDTH;
     int height = UILayout::WINDOW_HEIGHT;
     glfwGetFramebufferSize(window, &width, &height);
+
+    if (ui_ctrl.IsSimulationFullscreen()) {
+        return {width, height};
+    }
 
     const int sim_width = width - static_cast<int>(UILayout::LEFT_PANEL_WIDTH
         + UILayout::CONTENT_PANEL_MARGIN * 2.0f);

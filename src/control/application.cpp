@@ -10,6 +10,11 @@ namespace {
 
 using Clock = std::chrono::steady_clock;
 
+bool KeyPressed(GLFWwindow* window, int key)
+{
+    return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
 float DeltaTime(auto& previous_time)
 {
     const auto current_time = Clock::now();
@@ -32,6 +37,35 @@ void Application::ResetSimulation()
     phys_obj_view_ = std::make_unique<PhysObjView>(*physics_);
 }
 
+void Application::ProcessHotkeys()
+{
+    GLFWwindow* window = window_controller_.Window();
+    const bool simulation_is_active =
+        ui_controller_.GetMenuCond() == MenuCond::SIMULATION;
+
+    const bool space_pressed = KeyPressed(window, GLFW_KEY_SPACE);
+    if (space_pressed && !space_pressed_ && simulation_is_active) {
+        sim_controller_.ToggleStopFlag();
+    }
+    space_pressed_ = space_pressed;
+
+    const bool f11_pressed = KeyPressed(window, GLFW_KEY_F11);
+    if (f11_pressed && !f11_pressed_ && simulation_is_active) {
+        ui_controller_.ToggleSimulationFullscreen();
+    }
+    f11_pressed_ = f11_pressed;
+
+    const bool escape_pressed = KeyPressed(window, GLFW_KEY_ESCAPE);
+    if (escape_pressed && !escape_pressed_) {
+        if (ui_controller_.IsSimulationFullscreen()) {
+            ui_controller_.SetSimulationFullscreen(false);
+        } else if (ui_controller_.GetMenuCond() != MenuCond::MAIN) {
+            ui_controller_.SetMenuCond(MenuCond::MAIN);
+        }
+    }
+    escape_pressed_ = escape_pressed;
+}
+
 void Application::RunLoop()
 {
     auto previous_time = Clock::now();
@@ -40,6 +74,7 @@ void Application::RunLoop()
 
         glfwPollEvents();
         window_controller_.ProcessInput();
+        ProcessHotkeys();
 
         auto dt = DeltaTime(previous_time);
         if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond()))
@@ -47,7 +82,7 @@ void Application::RunLoop()
 
         phys_obj_view_->Update();
         auto [sim_width, sim_height] =
-            SimulationTextureSize(window_controller_.Window());
+            SimulationTextureSize(window_controller_.Window(), ui_controller_);
         const bool camera_input_enabled =
             ui_controller_.GetMenuCond() == MenuCond::SIMULATION;
 

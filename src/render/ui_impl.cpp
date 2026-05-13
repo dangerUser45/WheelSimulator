@@ -346,6 +346,37 @@ void DrawSimulation(const GLuint simulation_texture)
     DrawSection(draw_rect, "Simulation", true);
 }
 
+void DrawSimulationFullscreen(const GLuint simulation_texture)
+{
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+
+    ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(vp->Size, ImGuiCond_Always);
+
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, UILayout::CONTENT_BG_COLOR);
+    ImGui::PushStyleColor(ImGuiCol_Border, UILayout::CONTENT_BG_COLOR);
+
+    ImGui::Begin(
+        "SimulationFullscreen",
+        nullptr,
+        UILayout::IMGUI_BACKGROUND_WINDOW_FLAGS);
+
+    if (simulation_texture != 0) {
+        const ImVec2 pmin = vp->Pos;
+        const ImVec2 pmax(vp->Pos.x + vp->Size.x, vp->Pos.y + vp->Size.y);
+
+        ImGui::GetWindowDrawList()->AddImage(
+            (ImTextureID)(intptr_t)simulation_texture,
+            pmin,
+            pmax,
+            ImVec2(0.0f, 1.0f),
+            ImVec2(1.0f, 0.0f));
+    }
+
+    ImGui::End();
+    ImGui::PopStyleColor(2);
+}
+
 void DrawSettings()
 {
 

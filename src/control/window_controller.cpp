@@ -64,8 +64,16 @@ WindowController::~WindowController()
 
 void WindowController::ProcessInput() const
 {
-    if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    const bool escape_pressed =
+        glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+
+    const bool ctrl_pressed =
+        glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+        glfwGetKey(window_, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+
+    if (escape_pressed && ctrl_pressed) {
         glfwSetWindowShouldClose(window_, true);
+    }
 }
 
 bool WindowController::ShouldClose() const

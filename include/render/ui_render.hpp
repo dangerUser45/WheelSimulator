@@ -12,7 +12,9 @@
 
 namespace whsim {
 
-[[nodiscard]] std::pair<int, int> SimulationTextureSize(GLFWwindow* window);
+[[nodiscard]] std::pair<int, int> SimulationTextureSize(
+    GLFWwindow* window,
+    const UIController& ui_ctrl);
 
 class UIRender final {
 private:

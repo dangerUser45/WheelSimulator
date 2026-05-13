@@ -32,6 +32,11 @@ void SimController::SetStopFlag(bool new_stop_flag) noexcept
     is_stopped_ = new_stop_flag;
 }
 
+void SimController::ToggleStopFlag() noexcept
+{
+    is_stopped_ = !is_stopped_;
+}
+
 void SimController::SetResetFlag(bool new_reset_flag) noexcept
 {
     is_requested_reset_ = new_reset_flag;

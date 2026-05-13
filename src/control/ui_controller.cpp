@@ -47,9 +47,29 @@ const MenuCond& UIController::GetMenuCond() const noexcept
     return menu_cond_;
 }
 
+bool UIController::IsSimulationFullscreen() const noexcept
+{
+    return simulation_fullscreen_;
+}
+
 void UIController::SetMenuCond(const MenuCond menu_cond) noexcept
 {
     menu_cond_ = menu_cond;
+
+    if (menu_cond_ != MenuCond::SIMULATION) {
+        simulation_fullscreen_ = false;
+    }
+}
+
+void UIController::SetSimulationFullscreen(bool fullscreen) noexcept
+{
+    simulation_fullscreen_ =
+        fullscreen && menu_cond_ == MenuCond::SIMULATION;
+}
+
+void UIController::ToggleSimulationFullscreen() noexcept
+{
+    SetSimulationFullscreen(!simulation_fullscreen_);
 }
 
 } // namespace whsim

@@ -28,6 +28,13 @@ private:
     std::unique_ptr<Physics> physics_{};
     std::unique_ptr<PhysObjView> phys_obj_view_{};
 
+    bool space_pressed_ = false;
+    bool f11_pressed_ = false;
+    bool escape_pressed_ = false;
+
+private:
+    void ProcessHotkeys();
+
 public:
     Application();
 

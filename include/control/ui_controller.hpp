@@ -22,6 +22,7 @@ private:
     PreviewImage prev_img_{};
     StyleUI style_ui_{StyleUI::DARK};
     MenuCond menu_cond_{MenuCond::MAIN};
+    bool simulation_fullscreen_ = false;
 
 public:
     UIController();
@@ -29,8 +30,11 @@ public:
 
     [[nodiscard]] const PreviewImage& GetPreviewImage() const noexcept;
     [[nodiscard]] const MenuCond& GetMenuCond() const noexcept;
+    [[nodiscard]] bool IsSimulationFullscreen() const noexcept;
 
     void SetMenuCond(const MenuCond menu_cond) noexcept;
+    void SetSimulationFullscreen(bool fullscreen) noexcept;
+    void ToggleSimulationFullscreen() noexcept;
 };
 
 } // namespace whsim

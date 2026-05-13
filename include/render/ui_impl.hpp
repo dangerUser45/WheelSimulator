@@ -17,6 +17,7 @@ void ConfigureImGuiFont();
 void DrawPreviewImage(const PreviewImage& preview_image);
 void DrawMenu(UIController& ui_ctrl, SimController& sim_ctrl);
 void DrawSimulation(GLuint simulation_texture);
+void DrawSimulationFullscreen(GLuint simulation_texture);
 void DrawSettings();
 void DrawGraphics();
 

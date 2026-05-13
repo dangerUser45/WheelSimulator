@@ -16,6 +16,7 @@ public:
     [[nodiscard]] bool ShouldStepSimulation(const MenuCond&) const noexcept;
     [[nodiscard]] bool RequestReset() noexcept;
 
+    void ToggleStopFlag() noexcept;
     void SetStopFlag(bool new_stop_flag) noexcept;
     void SetResetFlag(bool new_reset_flag) noexcept;
 };
