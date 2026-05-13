@@ -12,6 +12,7 @@ namespace whsim {
 
 class Mesh;
 struct PhysObj;
+class TerrainGrid;
 
 class SimRender final {
 private:
@@ -36,15 +37,24 @@ private:
 
     Camera camera_{};
     SimulationSettings settings_{};
+    unsigned int terrain_revision_ = 0;
 
     bool initialized_ = false;
 
 private:
-    void Initialize(const SimulationSettings& settings);
-    void InitializeMeshes(const SimulationSettings& settings);
+    void Initialize(
+        const SimulationSettings& settings,
+        const TerrainGrid& terrain_grid);
+
+    void InitializeMeshes(
+        const SimulationSettings& settings,
+        const TerrainGrid& terrain_grid);
+
     void InitializeShader();
     void InitializeUniformLocations();
-    void RefreshSettings(const SimulationSettings& settings);
+    void RefreshSettings(
+        const SimulationSettings& settings,
+        const TerrainGrid& terrain_grid);
 
     void EnsureFramebuffer(int width, int height);
     void DestroyFramebufferResources();
@@ -77,6 +87,7 @@ public:
     [[nodiscard]] unsigned int Render(
         GLFWwindow* window,
         const std::vector<PhysObj>& objects,
+        const TerrainGrid& terrain_grid,
         int width,
         int height,
         float dt,

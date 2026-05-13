@@ -411,6 +411,11 @@ void DrawSettings(SimulationSettings& settings)
         ImGui::SliderFloat("Terrain friction", &settings.terrain.friction, 0.00f, 3.00f, "%.2f");
 
         ImGui::Spacing();
+        ImGui::TextUnformatted("Terrain");
+        ImGui::SliderFloat("Height", &settings.terrain.height_amplitude, 0.00f, 0.50f, "%.2f");
+        ImGui::SliderFloat("Frequency", &settings.terrain.noise_frequency, 0.05f, 2.00f, "%.2f");
+
+        ImGui::Spacing();
         ImGui::TextUnformatted("Camera");
         if (ImGui::Combo("View mode", &camera_mode, camera_modes, 2)) {
             settings.camera.mode = camera_mode == 0

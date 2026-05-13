@@ -89,6 +89,7 @@ void Application::RunLoop()
         const GLuint sim_texture = sim_render_.Render(
             window_controller_.Window(),
             phys_obj_view_->PhysObjects(),
+            phys_obj_view_->TerrainGridData(),
             sim_width,
             sim_height,
             dt,

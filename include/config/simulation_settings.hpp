@@ -26,6 +26,8 @@ struct TerrainSettings {
     float cell_size = 0.08f;
     float min_height = -1.0f;
     float max_height = 1.0f;
+    float height_amplitude = 0.18f;
+    float noise_frequency = 0.45f;
     float friction = 1.0f;
 };
 
@@ -72,6 +74,8 @@ struct SimulationSettings {
         lhs.terrain.cell_size != rhs.terrain.cell_size ||
         lhs.terrain.min_height != rhs.terrain.min_height ||
         lhs.terrain.max_height != rhs.terrain.max_height ||
+        lhs.terrain.height_amplitude != rhs.terrain.height_amplitude ||
+        lhs.terrain.noise_frequency != rhs.terrain.noise_frequency ||
         lhs.terrain.friction != rhs.terrain.friction;
 }
 

@@ -8,6 +8,7 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "config/simulation_settings.hpp"
+#include "physics/terrain_grid.hpp"
 
 namespace whsim {
 
@@ -42,6 +43,7 @@ public:
     [[nodiscard]] const std::vector<BulletObj>& Wheels() const noexcept;
     [[nodiscard]] const std::vector<BulletObj>& Suspensions() const noexcept;
     [[nodiscard]] const BulletObj& Terrain() const noexcept;
+    [[nodiscard]] const TerrainGrid& TerrainGridData() const noexcept;
     [[nodiscard]] const BulletObj& CarBody() const noexcept;
 
 private:
@@ -52,8 +54,8 @@ private:
     
     std::unique_ptr<btDiscreteDynamicsWorld> world_;
 
-    std::vector<float> terrain_heights_;
     SimulationSettings settings_;
+    TerrainGrid terrain_grid_;
 
     // какие в целом объекты:
     //      земля (массив высот)
@@ -71,6 +73,8 @@ private:
     void CreateTerrain();
     void CreateWheel(CarSide side);
     void ApplyWheelDrive(CarSide side);
+    void UpdateTerrainAroundWheel();
+    void MoveTerrainBody();
 };
 
 } // namespace whsim

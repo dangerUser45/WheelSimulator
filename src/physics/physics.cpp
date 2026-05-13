@@ -28,8 +28,8 @@ Physics::Physics(const SimulationSettings& settings) :
         solver_.get(),
         collision_config_.get()
     )),
-    terrain_heights_{},
     settings_(settings),
+    terrain_grid_(settings_.terrain),
     wheels_(4),
     suspensions_(4),
     car_body_{},
@@ -61,25 +61,10 @@ void Physics::CreateTerrain()
     //         |                 |
     //         ↓_________________|
 
-    const auto init_width_terrain =
-        static_cast<std::size_t>(settings_.terrain.samples_x);
-
-    const auto init_length_terrain =
-        static_cast<std::size_t>(settings_.terrain.samples_y);
-    
-    terrain_heights_.resize(init_width_terrain * init_length_terrain);
-    
-    for(std::size_t length_idx = 0; length_idx < init_length_terrain; ++length_idx)
-        for(std::size_t width_idx = 0; width_idx < init_width_terrain; ++width_idx) {
-            float height = 0.00f;
-
-            // height = std::min();
-            terrain_heights_[length_idx * init_width_terrain + width_idx] = height;
-        }
-
     auto terrain_shape = std::make_unique<btHeightfieldTerrainShape>(
-        init_width_terrain, init_length_terrain,
-        terrain_heights_.data(),
+        terrain_grid_.SamplesX(),
+        terrain_grid_.SamplesY(),
+        terrain_grid_.HeightsData(),
         1.0f,                       //height scale: with scale=1.0f => 1metr = 1.0f
         settings_.terrain.min_height,
         settings_.terrain.max_height,
@@ -95,7 +80,11 @@ void Physics::CreateTerrain()
 
     btTransform ground_transform{};
     ground_transform.setIdentity();
-    ground_transform.setOrigin(btVector3{0.0f, 0.0f, 0.0f});
+    ground_transform.setOrigin(btVector3{
+        terrain_grid_.CenterX(),
+        terrain_grid_.CenterY(),
+        0.0f
+    });
 
     auto terrain_motion = std::make_unique<btDefaultMotionState>(ground_transform);
 
@@ -175,15 +164,55 @@ void Physics::ApplyWheelDrive(CarSide side)
 }
 
 void Physics::Step(float dt)
-{   
+{
+    UpdateTerrainAroundWheel();
     ApplyWheelDrive(CarSide::LF);
 
     world_->stepSimulation(dt, 8, 1.0f / 60.0f);
 }
 
+void Physics::UpdateTerrainAroundWheel()
+{
+    const btRigidBody* body = wheels_[idx(CarSide::LF)].rigid_body.get();
+
+    if (body == nullptr) {
+        return;
+    }
+
+    const btVector3 origin = body->getWorldTransform().getOrigin();
+
+    if (terrain_grid_.CenterAround(origin.x(), origin.y())) {
+        MoveTerrainBody();
+    }
+}
+
+void Physics::MoveTerrainBody()
+{
+    if (terrain_.rigid_body == nullptr) {
+        return;
+    }
+
+    btTransform ground_transform{};
+    ground_transform.setIdentity();
+    ground_transform.setOrigin(btVector3{
+        terrain_grid_.CenterX(),
+        terrain_grid_.CenterY(),
+        0.0f
+    });
+
+    terrain_.rigid_body->setWorldTransform(ground_transform);
+
+    if (terrain_.state != nullptr) {
+        terrain_.state->setWorldTransform(ground_transform);
+    }
+
+    world_->updateSingleAabb(terrain_.rigid_body.get());
+}
+
 const std::vector<Physics::BulletObj>& Physics::Wheels() const noexcept { return wheels_; }
 const std::vector<Physics::BulletObj>& Physics::Suspensions() const noexcept { return suspensions_; }
 const Physics::BulletObj& Physics::Terrain() const noexcept { return terrain_; }
+const TerrainGrid& Physics::TerrainGridData() const noexcept { return terrain_grid_; }
 const Physics::BulletObj& Physics::CarBody() const noexcept { return car_body_; }
 
 } // namespace whsim

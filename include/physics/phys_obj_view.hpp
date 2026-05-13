@@ -8,6 +8,8 @@
 
 namespace whsim {
 
+class TerrainGrid;
+
 enum class PhysObjKind : std::uint8_t {
     Wheel,
     Suspension,
@@ -33,6 +35,7 @@ public:
     void Update();
 
     [[nodiscard]] const std::vector<PhysObj>& PhysObjects() const noexcept;
+    [[nodiscard]] const TerrainGrid& TerrainGridData() const noexcept;
 };
 
 } // namespace whsim

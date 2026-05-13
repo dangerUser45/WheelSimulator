@@ -60,4 +60,9 @@ const std::vector<PhysObj>& PhysObjView::PhysObjects() const noexcept
     return phys_objects_;
 }
 
+const TerrainGrid& PhysObjView::TerrainGridData() const noexcept
+{
+    return physics_.TerrainGridData();
+}
+
 } // namespace whsim

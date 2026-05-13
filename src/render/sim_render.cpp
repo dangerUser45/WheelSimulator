@@ -17,6 +17,7 @@
 #include <glm/vec3.hpp>
 
 #include "physics/phys_obj_view.hpp"
+#include "physics/terrain_grid.hpp"
 #include "render/mesh.hpp"
 
 namespace whsim {
@@ -203,37 +204,103 @@ glm::mat4 MatrixFromPhysObj(const PhysObj& object)
     return matrix;
 }
 
-Mesh CreateTerrainMesh()
+glm::vec3 TerrainNormal(const TerrainGrid& terrain, int x, int y)
 {
-    constexpr float half_size = 12.8f;
+    const int left = std::max(0, x - 1);
+    const int right = std::min(terrain.SamplesX() - 1, x + 1);
+    const int down = std::max(0, y - 1);
+    const int up = std::min(terrain.SamplesY() - 1, y + 1);
 
-    std::vector<Vertex> vertices{
-        {
-            glm::vec3{-half_size, -half_size, 0.0f},
-            glm::vec3{0.0f, 0.0f, 1.0f},
-            glm::vec2{0.0f, 0.0f}
-        },
-        {
-            glm::vec3{half_size, -half_size, 0.0f},
-            glm::vec3{0.0f, 0.0f, 1.0f},
-            glm::vec2{1.0f, 0.0f}
-        },
-        {
-            glm::vec3{half_size, half_size, 0.0f},
-            glm::vec3{0.0f, 0.0f, 1.0f},
-            glm::vec2{1.0f, 1.0f}
-        },
-        {
-            glm::vec3{-half_size, half_size, 0.0f},
-            glm::vec3{0.0f, 0.0f, 1.0f},
-            glm::vec2{0.0f, 1.0f}
+    const auto index = [&terrain](int sample_x, int sample_y) {
+        return static_cast<std::size_t>(sample_y) *
+            static_cast<std::size_t>(terrain.SamplesX()) +
+            static_cast<std::size_t>(sample_x);
+    };
+
+    const float height_left = terrain.Heights()[index(left, y)];
+    const float height_right = terrain.Heights()[index(right, y)];
+    const float height_down = terrain.Heights()[index(x, down)];
+    const float height_up = terrain.Heights()[index(x, up)];
+
+    const glm::vec3 dx{
+        static_cast<float>(right - left) * terrain.CellSize(),
+        0.0f,
+        height_right - height_left
+    };
+
+    const glm::vec3 dy{
+        0.0f,
+        static_cast<float>(up - down) * terrain.CellSize(),
+        height_up - height_down
+    };
+
+    return glm::normalize(glm::cross(dx, dy));
+}
+
+Mesh CreateTerrainMesh(const TerrainGrid& terrain)
+{
+    const float half_width =
+        static_cast<float>(terrain.SamplesX() - 1) *
+        terrain.CellSize() * 0.5f;
+
+    const float half_length =
+        static_cast<float>(terrain.SamplesY() - 1) *
+        terrain.CellSize() * 0.5f;
+
+    std::vector<Vertex> vertices;
+    vertices.reserve(
+        static_cast<std::size_t>(terrain.SamplesX()) *
+        static_cast<std::size_t>(terrain.SamplesY()));
+
+    for (int y = 0; y < terrain.SamplesY(); ++y) {
+        for (int x = 0; x < terrain.SamplesX(); ++x) {
+            const auto height_index =
+                static_cast<std::size_t>(y) *
+                static_cast<std::size_t>(terrain.SamplesX()) +
+                static_cast<std::size_t>(x);
+
+            vertices.push_back(Vertex{
+                glm::vec3{
+                    static_cast<float>(x) * terrain.CellSize() - half_width,
+                    static_cast<float>(y) * terrain.CellSize() - half_length,
+                    terrain.Heights()[height_index]
+                },
+                TerrainNormal(terrain, x, y),
+                glm::vec2{
+                    static_cast<float>(x) /
+                        static_cast<float>(terrain.SamplesX() - 1),
+                    static_cast<float>(y) /
+                        static_cast<float>(terrain.SamplesY() - 1)
+                }
+            });
         }
-    };
+    }
 
-    std::vector<unsigned int> indices{
-        0, 1, 2,
-        0, 2, 3
-    };
+    std::vector<unsigned int> indices;
+    indices.reserve(
+        static_cast<std::size_t>(terrain.SamplesX() - 1) *
+        static_cast<std::size_t>(terrain.SamplesY() - 1) * 6U);
+
+    for (int y = 0; y < terrain.SamplesY() - 1; ++y) {
+        for (int x = 0; x < terrain.SamplesX() - 1; ++x) {
+            const auto current =
+                static_cast<unsigned int>(y * terrain.SamplesX() + x);
+
+            const auto right = current + 1U;
+            const auto up =
+                static_cast<unsigned int>((y + 1) * terrain.SamplesX() + x);
+
+            const auto up_right = up + 1U;
+
+            indices.push_back(current);
+            indices.push_back(right);
+            indices.push_back(up);
+
+            indices.push_back(right);
+            indices.push_back(up_right);
+            indices.push_back(up);
+        }
+    }
 
     return Mesh(vertices, indices);
 }
@@ -591,15 +658,18 @@ SimRender::~SimRender()
     }
 }
 
-void SimRender::Initialize(const SimulationSettings& settings)
+void SimRender::Initialize(
+    const SimulationSettings& settings,
+    const TerrainGrid& terrain_grid)
 {
     if (initialized_) {
         return;
     }
 
     InitializeShader();
-    InitializeMeshes(settings);
+    InitializeMeshes(settings, terrain_grid);
     settings_ = settings;
+    terrain_revision_ = terrain_grid.Revision();
     camera_.ApplySettings(settings_.camera);
 
     initialized_ = true;
@@ -635,16 +705,25 @@ void SimRender::InitializeUniformLocations()
         GetUniformLocationChecked(shader_program_, "uLightDir");
 }
 
-void SimRender::InitializeMeshes(const SimulationSettings& settings)
+void SimRender::InitializeMeshes(
+    const SimulationSettings& settings,
+    const TerrainGrid& terrain_grid)
 {
-    terrain_mesh_ = std::make_unique<Mesh>(CreateTerrainMesh());
+    terrain_mesh_ = std::make_unique<Mesh>(CreateTerrainMesh(terrain_grid));
     wheel_mesh_ = std::make_unique<Mesh>(CreateWheelMesh(settings.wheel));
     box_mesh_ = std::make_unique<Mesh>(CreateBoxMesh());
 }
 
-void SimRender::RefreshSettings(const SimulationSettings& settings)
+void SimRender::RefreshSettings(
+    const SimulationSettings& settings,
+    const TerrainGrid& terrain_grid)
 {
     camera_.ApplySettings(settings.camera);
+
+    if (terrain_revision_ != terrain_grid.Revision()) {
+        terrain_mesh_ = std::make_unique<Mesh>(CreateTerrainMesh(terrain_grid));
+        terrain_revision_ = terrain_grid.Revision();
+    }
 
     if (WheelMeshSettingsChanged(settings_, settings)) {
         wheel_mesh_ = std::make_unique<Mesh>(CreateWheelMesh(settings.wheel));
@@ -821,6 +900,7 @@ void SimRender::EndRenderToTexture() const
 unsigned int SimRender::Render(
     GLFWwindow* window,
     const std::vector<PhysObj>& objects,
+    const TerrainGrid& terrain_grid,
     int width,
     int height,
     float dt,
@@ -831,8 +911,8 @@ unsigned int SimRender::Render(
         return 0;
     }
 
-    Initialize(settings);
-    RefreshSettings(settings);
+    Initialize(settings, terrain_grid);
+    RefreshSettings(settings, terrain_grid);
     camera_.Update(window, objects, dt, camera_input_enabled);
 
     EnsureFramebuffer(width, height);
