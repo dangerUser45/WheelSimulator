@@ -29,7 +29,6 @@ void UploadElementBuffer(const std::vector<unsigned int>& indices)
 void ConfigurePositionAttribute()
 {
     glEnableVertexAttribArray(0);
-
     glVertexAttribPointer(
         0,
         3,
@@ -43,7 +42,6 @@ void ConfigurePositionAttribute()
 void ConfigureNormalAttribute()
 {
     glEnableVertexAttribArray(1);
-
     glVertexAttribPointer(
         1,
         3,
@@ -57,7 +55,6 @@ void ConfigureNormalAttribute()
 void ConfigureTexCoordAttribute()
 {
     glEnableVertexAttribArray(2);
-
     glVertexAttribPointer(
         2,
         2,
@@ -164,19 +161,22 @@ void Mesh::Upload(
 
 void Mesh::Draw() const
 {
+    Draw(GL_TRIANGLES);
+}
+
+void Mesh::Draw(GLenum primitive) const
+{
     if (vao_ == 0 || index_count_ == 0) {
         return;
     }
 
     glBindVertexArray(vao_);
-
     glDrawElements(
-        GL_TRIANGLES,
+        primitive,
         index_count_,
         GL_UNSIGNED_INT,
         nullptr
     );
-
     glBindVertexArray(0);
 }
 

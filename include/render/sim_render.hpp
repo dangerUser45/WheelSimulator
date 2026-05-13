@@ -17,6 +17,7 @@ class TerrainGrid;
 class SimRender final {
 private:
     std::unique_ptr<Mesh> terrain_mesh_{};
+    std::unique_ptr<Mesh> terrain_grid_mesh_{};
     std::unique_ptr<Mesh> wheel_mesh_{};
     std::unique_ptr<Mesh> box_mesh_{};
 
@@ -27,6 +28,9 @@ private:
     int u_projection_location_ = -1;
     int u_color_location_ = -1;
     int u_light_dir_location_ = -1;
+    int u_view_pos_location_ = -1;
+    int u_specular_strength_location_ = -1;
+    int u_shininess_location_ = -1;
 
     unsigned int framebuffer_ = 0;
     unsigned int sim_texture_ = 0;
@@ -38,7 +42,6 @@ private:
     Camera camera_{};
     SimulationSettings settings_{};
     unsigned int terrain_revision_ = 0;
-
     bool initialized_ = false;
 
 private:
@@ -52,6 +55,7 @@ private:
 
     void InitializeShader();
     void InitializeUniformLocations();
+
     void RefreshSettings(
         const SimulationSettings& settings,
         const TerrainGrid& terrain_grid);
@@ -73,6 +77,7 @@ private:
         int height) const;
 
     void DrawObject(const PhysObj& object) const;
+    void DrawTerrain(const PhysObj& object) const;
 
 public:
     SimRender();
@@ -80,7 +85,6 @@ public:
 
     SimRender(const SimRender&) = delete;
     SimRender& operator=(const SimRender&) = delete;
-
     SimRender(SimRender&&) = delete;
     SimRender& operator=(SimRender&&) = delete;
 

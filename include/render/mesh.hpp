@@ -34,7 +34,6 @@ public:
 
     Mesh(Mesh&& other) noexcept;
     Mesh(const Mesh&) = delete;
-
     ~Mesh();
 
     Mesh& operator=(const Mesh&) = delete;
@@ -45,6 +44,7 @@ public:
         const std::vector<unsigned int>& indices);
 
     void Draw() const;
+    void Draw(GLenum primitive) const;
 };
 
 } // namespace whsim

@@ -21,8 +21,8 @@ struct WheelSettings {
 };
 
 struct TerrainSettings {
-    int samples_x = 128;
-    int samples_y = 128;
+    int samples_x = 1280;
+    int samples_y = 1280;
     float cell_size = 0.08f;
     float min_height = -1.0f;
     float max_height = 1.0f;
@@ -60,8 +60,7 @@ struct SimulationSettings {
     const SimulationSettings& lhs,
     const SimulationSettings& rhs) noexcept
 {
-    return
-        lhs.wheel.radius != rhs.wheel.radius ||
+    return lhs.wheel.radius != rhs.wheel.radius ||
         lhs.wheel.width != rhs.wheel.width ||
         lhs.wheel.mass != rhs.wheel.mass ||
         lhs.terrain.samples_x != rhs.terrain.samples_x ||
@@ -77,8 +76,7 @@ struct SimulationSettings {
     const SimulationSettings& lhs,
     const SimulationSettings& rhs) noexcept
 {
-    return
-        lhs.wheel.radius != rhs.wheel.radius ||
+    return lhs.wheel.radius != rhs.wheel.radius ||
         lhs.wheel.width != rhs.wheel.width;
 }
 

@@ -8,6 +8,7 @@ uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
+out vec3 vWorldPosition;
 out vec3 vNormal;
 out vec2 vTexCoord;
 
@@ -15,6 +16,7 @@ void main()
 {
     vec4 world_position = uModel * vec4(aPosition, 1.0);
 
+    vWorldPosition = world_position.xyz;
     vNormal = mat3(transpose(inverse(uModel))) * aNormal;
     vTexCoord = aTexCoord;
 

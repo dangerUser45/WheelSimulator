@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "config/simulation_settings.hpp"
@@ -10,7 +11,6 @@ class TerrainGrid final {
 private:
     TerrainSettings settings_{};
     std::vector<float> heights_{};
-
     int origin_cell_x_ = 0;
     int origin_cell_y_ = 0;
     unsigned int revision_ = 0;
@@ -33,7 +33,6 @@ public:
     [[nodiscard]] float CenterX() const noexcept;
     [[nodiscard]] float CenterY() const noexcept;
     [[nodiscard]] unsigned int Revision() const noexcept;
-
     [[nodiscard]] const std::vector<float>& Heights() const noexcept;
     [[nodiscard]] float* HeightsData() noexcept;
 };

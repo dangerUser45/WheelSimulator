@@ -15,8 +15,7 @@ constexpr float SECOND_OCTAVE_SCALE = 2.1f;
 constexpr float THIRD_OCTAVE_SCALE = 4.3f;
 constexpr float SECOND_OCTAVE_WEIGHT = 0.5f;
 constexpr float THIRD_OCTAVE_WEIGHT = 0.25f;
-constexpr float TOTAL_WEIGHT =
-    1.0f + SECOND_OCTAVE_WEIGHT + THIRD_OCTAVE_WEIGHT;
+constexpr float TOTAL_WEIGHT = 1.0f + SECOND_OCTAVE_WEIGHT + THIRD_OCTAVE_WEIGHT;
 
 float Fract(float value)
 {
@@ -36,10 +35,8 @@ float Lerp(float lhs, float rhs, float amount)
 float Hash(int x, int y)
 {
     const float value =
-        std::sin(static_cast<float>(x) * HASH_X +
-                 static_cast<float>(y) * HASH_Y) *
+        std::sin(static_cast<float>(x) * HASH_X + static_cast<float>(y) * HASH_Y) *
         HASH_SCALE;
-
     return Fract(value) * 2.0f - 1.0f;
 }
 
@@ -69,39 +66,48 @@ int ClampedSamples(int samples)
 
 } // namespace
 
-TerrainGrid::TerrainGrid(const TerrainSettings& settings) :
-    settings_(settings),
-    heights_{},
-    origin_cell_x_(-ClampedSamples(settings.samples_x) / 2),
-    origin_cell_y_(-ClampedSamples(settings.samples_y) / 2),
-    revision_(0)
+TerrainGrid::TerrainGrid(const TerrainSettings& settings)
+    : settings_(settings),
+      heights_{},
+      origin_cell_x_(-ClampedSamples(settings.samples_x) / 2),
+      origin_cell_y_(-ClampedSamples(settings.samples_y) / 2),
+      revision_(0)
 {
     heights_.resize(
         static_cast<std::size_t>(SamplesX()) *
-        static_cast<std::size_t>(SamplesY()));
-
+        static_cast<std::size_t>(SamplesY())
+    );
     RebuildHeights();
 }
 
 bool TerrainGrid::CenterAround(float world_x, float world_y)
 {
-    const int center_cell_x =
-        static_cast<int>(std::floor(world_x / settings_.cell_size));
+    const int center_cell_x = static_cast<int>(std::floor(world_x / settings_.cell_size));
+    const int center_cell_y = static_cast<int>(std::floor(world_y / settings_.cell_size));
 
-    const int center_cell_y =
-        static_cast<int>(std::floor(world_y / settings_.cell_size));
+    const int quarter_x = SamplesX() / 4;
+    const int quarter_y = SamplesY() / 4;
+
+    const bool inside_update_region_x =
+        center_cell_x >= origin_cell_x_ + quarter_x &&
+        center_cell_x < origin_cell_x_ + SamplesX() - quarter_x;
+    const bool inside_update_region_y =
+        center_cell_y >= origin_cell_y_ + quarter_y &&
+        center_cell_y < origin_cell_y_ + SamplesY() - quarter_y;
+
+    if (inside_update_region_x && inside_update_region_y) {
+        return false;
+    }
 
     const int next_origin_x = center_cell_x - SamplesX() / 2;
     const int next_origin_y = center_cell_y - SamplesY() / 2;
 
-    if (next_origin_x == origin_cell_x_ &&
-        next_origin_y == origin_cell_y_) {
+    if (next_origin_x == origin_cell_x_ && next_origin_y == origin_cell_y_) {
         return false;
     }
 
     origin_cell_x_ = next_origin_x;
     origin_cell_y_ = next_origin_y;
-
     RebuildHeights();
     return true;
 }
@@ -133,14 +139,12 @@ float TerrainGrid::OriginY() const noexcept
 
 float TerrainGrid::CenterX() const noexcept
 {
-    return OriginX() +
-        static_cast<float>(SamplesX() - 1) * settings_.cell_size * 0.5f;
+    return OriginX() + static_cast<float>(SamplesX() - 1) * settings_.cell_size * 0.5f;
 }
 
 float TerrainGrid::CenterY() const noexcept
 {
-    return OriginY() +
-        static_cast<float>(SamplesY() - 1) * settings_.cell_size * 0.5f;
+    return OriginY() + static_cast<float>(SamplesY() - 1) * settings_.cell_size * 0.5f;
 }
 
 unsigned int TerrainGrid::Revision() const noexcept
@@ -162,8 +166,7 @@ void TerrainGrid::RebuildHeights()
 {
     for (int y = 0; y < SamplesY(); ++y) {
         for (int x = 0; x < SamplesX(); ++x) {
-            heights_[Index(x, y)] =
-                HeightAtCell(origin_cell_x_ + x, origin_cell_y_ + y);
+            heights_[Index(x, y)] = HeightAtCell(origin_cell_x_ + x, origin_cell_y_ + y);
         }
     }
 
@@ -173,12 +176,9 @@ void TerrainGrid::RebuildHeights()
 float TerrainGrid::HeightAtCell(int cell_x, int cell_y) const
 {
     const float x =
-        static_cast<float>(cell_x) * settings_.cell_size *
-        settings_.noise_frequency;
-
+        static_cast<float>(cell_x) * settings_.cell_size * settings_.noise_frequency;
     const float y =
-        static_cast<float>(cell_y) * settings_.cell_size *
-        settings_.noise_frequency;
+        static_cast<float>(cell_y) * settings_.cell_size * settings_.noise_frequency;
 
     const float noise =
         ValueNoise(x, y) +
@@ -187,16 +187,13 @@ float TerrainGrid::HeightAtCell(int cell_x, int cell_y) const
         ValueNoise(x * THIRD_OCTAVE_SCALE, y * THIRD_OCTAVE_SCALE) *
             THIRD_OCTAVE_WEIGHT;
 
-    const float height =
-        settings_.height_amplitude * noise / TOTAL_WEIGHT;
-
+    const float height = settings_.height_amplitude * noise / TOTAL_WEIGHT;
     return std::clamp(height, settings_.min_height, settings_.max_height);
 }
 
 std::size_t TerrainGrid::Index(int x, int y) const noexcept
 {
-    return static_cast<std::size_t>(y) *
-        static_cast<std::size_t>(SamplesX()) +
+    return static_cast<std::size_t>(y) * static_cast<std::size_t>(SamplesX()) +
         static_cast<std::size_t>(x);
 }
 
