@@ -56,7 +56,7 @@ struct SimulationSettings {
     CameraSettings camera{};
 };
 
-[[nodiscard]] constexpr bool PhysicsSettingsChanged(
+[[nodiscard]] constexpr bool PhysicsResetSettingsChanged(
     const SimulationSettings& lhs,
     const SimulationSettings& rhs) noexcept
 {
@@ -64,19 +64,13 @@ struct SimulationSettings {
         lhs.wheel.radius != rhs.wheel.radius ||
         lhs.wheel.width != rhs.wheel.width ||
         lhs.wheel.mass != rhs.wheel.mass ||
-        lhs.wheel.friction != rhs.wheel.friction ||
-        lhs.wheel.rolling_friction != rhs.wheel.rolling_friction ||
-        lhs.wheel.spinning_friction != rhs.wheel.spinning_friction ||
-        lhs.wheel.target_angular_speed != rhs.wheel.target_angular_speed ||
-        lhs.wheel.drive_torque != rhs.wheel.drive_torque ||
         lhs.terrain.samples_x != rhs.terrain.samples_x ||
         lhs.terrain.samples_y != rhs.terrain.samples_y ||
         lhs.terrain.cell_size != rhs.terrain.cell_size ||
         lhs.terrain.min_height != rhs.terrain.min_height ||
         lhs.terrain.max_height != rhs.terrain.max_height ||
         lhs.terrain.height_amplitude != rhs.terrain.height_amplitude ||
-        lhs.terrain.noise_frequency != rhs.terrain.noise_frequency ||
-        lhs.terrain.friction != rhs.terrain.friction;
+        lhs.terrain.noise_frequency != rhs.terrain.noise_frequency;
 }
 
 [[nodiscard]] constexpr bool WheelMeshSettingsChanged(

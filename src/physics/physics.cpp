@@ -171,6 +171,29 @@ void Physics::Step(float dt)
     world_->stepSimulation(dt, 8, 1.0f / 60.0f);
 }
 
+void Physics::ApplySettings(const SimulationSettings& settings)
+{
+    settings_ = settings;
+    ApplyMaterialSettings();
+}
+
+void Physics::ApplyMaterialSettings()
+{
+    for (BulletObj& wheel : wheels_) {
+        if (wheel.rigid_body == nullptr) {
+            continue;
+        }
+
+        wheel.rigid_body->setFriction(settings_.wheel.friction);
+        wheel.rigid_body->setRollingFriction(settings_.wheel.rolling_friction);
+        wheel.rigid_body->setSpinningFriction(settings_.wheel.spinning_friction);
+    }
+
+    if (terrain_.rigid_body != nullptr) {
+        terrain_.rigid_body->setFriction(settings_.terrain.friction);
+    }
+}
+
 void Physics::UpdateTerrainAroundWheel()
 {
     const btRigidBody* body = wheels_[idx(CarSide::LF)].rigid_body.get();

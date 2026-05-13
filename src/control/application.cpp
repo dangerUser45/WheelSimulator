@@ -108,9 +108,11 @@ void Application::RunLoop()
             sim_texture
         );
 
-        if (PhysicsSettingsChanged(previous_settings, settings_)) {
+        if (PhysicsResetSettingsChanged(previous_settings, settings_)) {
             sim_controller_.SetStopFlag(true);
             this->ResetSimulation();
+        } else {
+            physics_->ApplySettings(settings_);
         }
 
         if (sim_controller_.RequestReset()) {

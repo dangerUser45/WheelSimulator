@@ -39,6 +39,7 @@ public:
 
     void Step(float dt);
     void ResetSimulation();
+    void ApplySettings(const SimulationSettings& settings);
 
     [[nodiscard]] const std::vector<BulletObj>& Wheels() const noexcept;
     [[nodiscard]] const std::vector<BulletObj>& Suspensions() const noexcept;
@@ -72,6 +73,7 @@ private:
 
     void CreateTerrain();
     void CreateWheel(CarSide side);
+    void ApplyMaterialSettings();
     void ApplyWheelDrive(CarSide side);
     void UpdateTerrainAroundWheel();
     void MoveTerrainBody();
