@@ -11,8 +11,6 @@
 
 #include <glad/gl.h>
 
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
@@ -26,10 +24,6 @@ namespace whsim {
 namespace {
 
 constexpr float PI = 3.14159265358979323846f;
-
-constexpr glm::vec3 CAMERA_POSITION{7.5f, -9.0f, 4.0f};
-constexpr glm::vec3 CAMERA_TARGET{0.0f, 0.0f, 0.35f};
-constexpr glm::vec3 CAMERA_UP{0.0f, 0.0f, 1.0f};
 
 constexpr glm::vec3 LIGHT_DIRECTION{0.35f, 0.75f, 0.55f};
 
@@ -207,28 +201,6 @@ glm::mat4 MatrixFromPhysObj(const PhysObj& object)
     }
 
     return matrix;
-}
-
-glm::mat4 CreateProjectionMatrix(int width, int height)
-{
-    const float aspect =
-        static_cast<float>(width) / static_cast<float>(height);
-
-    return glm::perspective(
-        glm::radians(50.0f),
-        aspect,
-        0.05f,
-        200.0f
-    );
-}
-
-glm::mat4 CreateViewMatrix()
-{
-    return glm::lookAt(
-        CAMERA_POSITION,
-        CAMERA_TARGET,
-        CAMERA_UP
-    );
 }
 
 Mesh CreateTerrainMesh()
@@ -834,13 +806,18 @@ void SimRender::EndRenderToTexture() const
 }
 
 unsigned int SimRender::Render(
+    GLFWwindow* window,
     const std::vector<PhysObj>& objects,
     int width,
-    int height)
+    int height,
+    float dt,
+    bool camera_input_enabled)
 {
     if (width <= 0 || height <= 0) {
         return 0;
     }
+
+    camera_.Update(window, objects, dt, camera_input_enabled);
 
     Initialize();
     EnsureFramebuffer(width, height);
@@ -861,8 +838,8 @@ void SimRender::DrawObjects(
         return;
     }
 
-    const glm::mat4 projection = CreateProjectionMatrix(width, height);
-    const glm::mat4 view = CreateViewMatrix();
+    const glm::mat4 projection = camera_.ProjectionMatrix(width, height);
+    const glm::mat4 view = camera_.ViewMatrix();
 
     glUseProgram(shader_program_);
 

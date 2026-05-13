@@ -48,6 +48,7 @@ add_executable(WheelSimulator
     src/physics/physics.cpp
     src/physics/phys_obj_view.cpp
     
+    src/render/camera.cpp
     src/render/mesh.cpp
     src/render/sim_render.cpp
     src/render/ui_impl.cpp

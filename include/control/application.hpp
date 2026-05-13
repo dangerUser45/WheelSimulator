@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
 #include "control/window_controller.hpp"

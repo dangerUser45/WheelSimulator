@@ -48,10 +48,16 @@ void Application::RunLoop()
         phys_obj_view_->Update();
         auto [sim_width, sim_height] =
             SimulationTextureSize(window_controller_.Window());
+        const bool camera_input_enabled =
+            ui_controller_.GetMenuCond() == MenuCond::SIMULATION;
+
         const GLuint sim_texture = sim_render_.Render(
+            window_controller_.Window(),
             phys_obj_view_->PhysObjects(),
             sim_width,
-            sim_height
+            sim_height,
+            dt,
+            camera_input_enabled
         );
         
         ui_render_.Render(

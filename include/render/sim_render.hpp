@@ -3,6 +3,10 @@
 #include <memory>
 #include <vector>
 
+#include "render/camera.hpp"
+
+struct GLFWwindow;
+
 namespace whsim {
 
 class Mesh;
@@ -28,6 +32,8 @@ private:
 
     int texture_width_ = 0;
     int texture_height_ = 0;
+
+    Camera camera_{};
 
     bool initialized_ = false;
 
@@ -66,9 +72,12 @@ public:
     SimRender& operator=(SimRender&&) = delete;
 
     [[nodiscard]] unsigned int Render(
+        GLFWwindow* window,
         const std::vector<PhysObj>& objects,
         int width,
-        int height);
+        int height,
+        float dt,
+        bool camera_input_enabled);
 
     [[nodiscard]] unsigned int SimTexture() const noexcept;
 };
