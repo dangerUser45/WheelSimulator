@@ -196,15 +196,22 @@ void DrawFloatControl(
         120.0f,
         ImGui::GetContentRegionAvail().x - input_width - spacing);
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{10.0f, 7.0f});
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(17, 19, 23, 255));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(31, 35, 42, 255));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, IM_COL32(31, 35, 42, 255));
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
     ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##slider", &value, min_value, max_value, format);
-    ImGui::PopStyleColor(2);
+    ImGui::PopStyleColor(5);
 
     ImGui::SameLine(0.0f, spacing);
     ImGui::SetNextItemWidth(input_width);
     ImGui::InputFloat("##input", &value, 0.0f, 0.0f, format);
+    ImGui::PopStyleVar(3);
     value = std::clamp(value, min_value, max_value);
 
     ImGui::PopID();
@@ -471,7 +478,7 @@ void DrawSettings(SimulationSettings& settings)
             UILayout::CONTENT_PANEL_MARGIN,
             UILayout::SIMULATION_PANEL_MARGIN);
         const ImVec2 panel_size(
-            std::min(720.0f, size_window.x - UILayout::CONTENT_PANEL_MARGIN * 2.0f),
+            size_window.x - UILayout::CONTENT_PANEL_MARGIN * 2.0f,
             size_window.y - UILayout::SIMULATION_PANEL_MARGIN - UILayout::CONTENT_PANEL_MARGIN);
 
         ImGui::SetCursorPos(panel_pos);
