@@ -32,12 +32,18 @@ private:
     std::unique_ptr<Physics> physics_{};
     std::unique_ptr<PhysObjView> phys_obj_view_{};
 
-    bool space_pressed_ = false;
-    bool f11_pressed_ = false;
-    bool escape_pressed_ = false;
+    bool pause_toggle_shortcut_pressed_ = false;
+    bool fullscreen_toggle_shortcut_pressed_ = false;
+    bool reset_simulation_shortcut_pressed_ = false;
+    bool main_menu_shortcut_pressed_ = false;
+    bool settings_menu_shortcut_pressed_ = false;
+    bool simulation_menu_shortcut_pressed_ = false;
+    bool graphics_menu_shortcut_pressed_ = false;
+    bool back_navigation_shortcut_pressed_ = false;
 
 private:
     void ProcessHotkeys();
+    void ProcessCameraSpeedScroll();
 
 public:
     Application();

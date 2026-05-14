@@ -1,5 +1,8 @@
 #include <chrono>
+#include <algorithm>
 #include <memory>
+
+#include <imgui.h>
 
 #include "control/application.hpp"
 #include "physics/phys_obj_view.hpp"
@@ -13,6 +16,13 @@ using Clock = std::chrono::steady_clock;
 bool KeyPressed(GLFWwindow* window, int key)
 {
     return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
+bool CtrlPressed(GLFWwindow* window)
+{
+    return
+        glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
 }
 
 float DeltaTime(auto& previous_time)
@@ -43,28 +53,89 @@ void Application::ProcessHotkeys()
     GLFWwindow* window = window_controller_.Window();
     const bool simulation_is_active =
         ui_controller_.GetMenuCond() == MenuCond::SIMULATION;
+    const bool ctrl_pressed = CtrlPressed(window);
 
-    const bool space_pressed = KeyPressed(window, GLFW_KEY_SPACE);
-    if (space_pressed && !space_pressed_ && simulation_is_active) {
+    const bool main_menu_shortcut_pressed =
+        ctrl_pressed && KeyPressed(window, GLFW_KEY_1);
+    if (main_menu_shortcut_pressed && !main_menu_shortcut_pressed_) {
+        ui_controller_.SetMenuCond(MenuCond::MAIN);
+    }
+    main_menu_shortcut_pressed_ = main_menu_shortcut_pressed;
+
+    const bool settings_menu_shortcut_pressed =
+        ctrl_pressed && KeyPressed(window, GLFW_KEY_2);
+    if (settings_menu_shortcut_pressed && !settings_menu_shortcut_pressed_) {
+        ui_controller_.SetMenuCond(MenuCond::SETTINGS);
+    }
+    settings_menu_shortcut_pressed_ = settings_menu_shortcut_pressed;
+
+    const bool simulation_menu_shortcut_pressed =
+        ctrl_pressed && KeyPressed(window, GLFW_KEY_3);
+    if (simulation_menu_shortcut_pressed && !simulation_menu_shortcut_pressed_) {
+        ui_controller_.SetMenuCond(MenuCond::SIMULATION);
+    }
+    simulation_menu_shortcut_pressed_ = simulation_menu_shortcut_pressed;
+
+    const bool graphics_menu_shortcut_pressed =
+        ctrl_pressed && KeyPressed(window, GLFW_KEY_4);
+    if (graphics_menu_shortcut_pressed && !graphics_menu_shortcut_pressed_) {
+        ui_controller_.SetMenuCond(MenuCond::GRAPHICS);
+    }
+    graphics_menu_shortcut_pressed_ = graphics_menu_shortcut_pressed;
+
+    const bool pause_toggle_shortcut_pressed = KeyPressed(window, GLFW_KEY_SPACE);
+    if (pause_toggle_shortcut_pressed &&
+        !pause_toggle_shortcut_pressed_ &&
+        simulation_is_active) {
         sim_controller_.ToggleStopFlag();
     }
-    space_pressed_ = space_pressed;
+    pause_toggle_shortcut_pressed_ = pause_toggle_shortcut_pressed;
 
-    const bool f11_pressed = KeyPressed(window, GLFW_KEY_F11);
-    if (f11_pressed && !f11_pressed_ && simulation_is_active) {
+    const bool fullscreen_toggle_shortcut_pressed = KeyPressed(window, GLFW_KEY_F3);
+    if (fullscreen_toggle_shortcut_pressed &&
+        !fullscreen_toggle_shortcut_pressed_ &&
+        simulation_is_active) {
         ui_controller_.ToggleSimulationFullscreen();
     }
-    f11_pressed_ = f11_pressed;
+    fullscreen_toggle_shortcut_pressed_ = fullscreen_toggle_shortcut_pressed;
 
-    const bool escape_pressed = KeyPressed(window, GLFW_KEY_ESCAPE);
-    if (escape_pressed && !escape_pressed_) {
+    const bool reset_simulation_shortcut_pressed =
+        ctrl_pressed && KeyPressed(window, GLFW_KEY_ENTER);
+    if (reset_simulation_shortcut_pressed &&
+        !reset_simulation_shortcut_pressed_ &&
+        simulation_is_active) {
+        sim_controller_.SetStopFlag(true);
+        sim_controller_.SetResetFlag(true);
+    }
+    reset_simulation_shortcut_pressed_ = reset_simulation_shortcut_pressed;
+
+    const bool back_navigation_shortcut_pressed = KeyPressed(window, GLFW_KEY_ESCAPE);
+    if (back_navigation_shortcut_pressed && !back_navigation_shortcut_pressed_) {
         if (ui_controller_.IsSimulationFullscreen()) {
             ui_controller_.SetSimulationFullscreen(false);
         } else if (ui_controller_.GetMenuCond() != MenuCond::MAIN) {
             ui_controller_.SetMenuCond(MenuCond::MAIN);
         }
     }
-    escape_pressed_ = escape_pressed;
+    back_navigation_shortcut_pressed_ = back_navigation_shortcut_pressed;
+}
+
+void Application::ProcessCameraSpeedScroll()
+{
+    if (ui_controller_.GetMenuCond() != MenuCond::SIMULATION ||
+        settings_.camera.mode != CameraMode::Free) {
+        return;
+    }
+
+    const float wheel_delta = ImGui::GetIO().MouseWheel;
+    if (wheel_delta == 0.0f) {
+        return;
+    }
+
+    settings_.camera.free_move_speed = std::clamp(
+        settings_.camera.free_move_speed + wheel_delta * 1.5f,
+        0.5f,
+        50.0f);
 }
 
 void Application::RunLoop()
@@ -111,6 +182,7 @@ void Application::RunLoop()
             graphics_,
             sim_texture
         );
+        ProcessCameraSpeedScroll();
 
         if (PhysicsResetSettingsChanged(previous_settings, settings_)) {
             sim_controller_.SetStopFlag(true);
