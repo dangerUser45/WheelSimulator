@@ -14,6 +14,16 @@ void framebuffer_size_callback(GLFWwindow*, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void scroll_callback(GLFWwindow* window, double, double yoffset)
+{
+    auto* controller =
+        static_cast<WindowController*>(glfwGetWindowUserPointer(window));
+
+    if (controller != nullptr) {
+        controller->AddScrollYOffset(yoffset);
+    }
+}
+
 } // namespace
 
 WindowController::WindowController(int init_window_width, int init_window_height)
@@ -39,6 +49,7 @@ WindowController::WindowController(int init_window_width, int init_window_height
     }
 
     window_ = window;
+    glfwSetWindowUserPointer(window_, this);
     
     glfwMakeContextCurrent(window);
 
@@ -48,6 +59,7 @@ WindowController::WindowController(int init_window_width, int init_window_height
 
     glViewport(0, 0, UILayout::WINDOW_WIDTH, UILayout::WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetScrollCallback(window, scroll_callback);
     glfwSwapInterval(1);
 
     glfwSetWindowSizeLimits(window_, UILayout::MIN_WINDOW_WIDTH, UILayout::MIN_WINDOW_HEIGTH,
@@ -79,6 +91,18 @@ void WindowController::ProcessInput() const
 bool WindowController::ShouldClose() const
 {
     return glfwWindowShouldClose(window_) != 0;
+}
+
+void WindowController::AddScrollYOffset(double yoffset) noexcept
+{
+    scroll_y_offset_ += yoffset;
+}
+
+double WindowController::ConsumeScrollYOffset() noexcept
+{
+    const double yoffset = scroll_y_offset_;
+    scroll_y_offset_ = 0.0;
+    return yoffset;
 }
 
 GLFWwindow* WindowController::Window() const noexcept { return window_; }

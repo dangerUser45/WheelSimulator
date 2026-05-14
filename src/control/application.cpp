@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <memory>
 
-#include <imgui.h>
-
 #include "control/application.hpp"
 #include "physics/phys_obj_view.hpp"
 
@@ -127,7 +125,8 @@ void Application::ProcessCameraSpeedScroll()
         return;
     }
 
-    const float wheel_delta = ImGui::GetIO().MouseWheel;
+    const auto wheel_delta =
+        static_cast<float>(window_controller_.ConsumeScrollYOffset());
     if (wheel_delta == 0.0f) {
         return;
     }
