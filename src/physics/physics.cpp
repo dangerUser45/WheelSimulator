@@ -17,6 +17,8 @@ void RemoveRigidBody(btDiscreteDynamicsWorld& world,
     }
 }
 
+constexpr float WORLD_REBASE_DISTANCE = 1000.0f;
+
 }
 
 Physics::Physics(const SimulationSettings& settings) :
@@ -205,23 +207,24 @@ void Physics::UpdateTerrainAroundWheel()
         return;
     }
 
-    const btVector3 origin = body->getWorldTransform().getOrigin() +
+    const btVector3 local_origin = body->getWorldTransform().getOrigin();
+    const btVector3 origin = local_origin +
         world_origin_offset_;
-    const btVector3 old_center{
-        terrain_grid_.CenterX(),
-        terrain_grid_.CenterY(),
+
+    if (terrain_grid_.CenterAround(origin.x(), origin.y())) {
+        MoveTerrainBody();
+    }
+
+    const btVector3 planar_local_origin{
+        local_origin.x(),
+        local_origin.y(),
         0.0f
     };
 
-    if (terrain_grid_.CenterAround(origin.x(), origin.y())) {
-        const btVector3 new_center{
-            terrain_grid_.CenterX(),
-            terrain_grid_.CenterY(),
-            0.0f
-        };
-        const btVector3 delta = new_center - old_center;
-        world_origin_offset_ += delta;
-        RebaseWorld(delta);
+    if (planar_local_origin.length2() >
+        WORLD_REBASE_DISTANCE * WORLD_REBASE_DISTANCE) {
+        world_origin_offset_ += planar_local_origin;
+        RebaseWorld(planar_local_origin);
         MoveTerrainBody();
     }
 }
