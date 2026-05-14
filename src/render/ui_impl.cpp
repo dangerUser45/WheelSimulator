@@ -537,8 +537,6 @@ void DrawGraphics(const Graphics& graphics)
         ImGui::Spacing();
         ImGui::BeginChild("GraphicsScroll", ImVec2{0.0f, 0.0f}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
-        DrawPlot("Position X", "x, m", series.time, series.position_x);
-        DrawPlot("Position Y", "y, m", series.time, series.position_y);
         DrawPlot("Position Z", "z, m", series.time, series.position_z);
         DrawPlot("Speed", "m/s", series.time, series.speed);
         DrawPlot("Acceleration", "m/s^2", series.time, series.acceleration);

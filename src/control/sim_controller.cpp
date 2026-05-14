@@ -14,7 +14,11 @@ bool SimController::IsReseted() const noexcept
 
 bool SimController::ShouldStepSimulation(const MenuCond& menu_cond) const noexcept
 {
-    if((!is_stopped_) && (menu_cond == MenuCond::SIMULATION)) return true;
+    if(!is_stopped_ &&
+        (menu_cond == MenuCond::SIMULATION || menu_cond == MenuCond::GRAPHICS)) {
+        return true;
+    }
+
     return false;
 }
 
