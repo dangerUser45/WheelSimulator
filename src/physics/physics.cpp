@@ -1,8 +1,6 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btVector3.h>
 
-#include <cmath>
-
 #include "physics/physics.hpp"
 
 namespace whsim {
