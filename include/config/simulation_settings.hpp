@@ -21,8 +21,8 @@ struct WheelSettings {
 };
 
 struct TerrainSettings {
-    int samples_x = 1280;
-    int samples_y = 1280;
+    int samples_x = 256;
+    int samples_y = 256;
     float cell_size = 0.08f;
     float min_height = -1.0f;
     float max_height = 1.0f;
