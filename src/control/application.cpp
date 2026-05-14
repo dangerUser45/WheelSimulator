@@ -35,6 +35,7 @@ void Application::ResetSimulation()
 {
     physics_ = std::make_unique<Physics>(settings_);
     phys_obj_view_ = std::make_unique<PhysObjView>(*physics_);
+    graphics_.Clear();
 }
 
 void Application::ProcessHotkeys()
@@ -77,8 +78,10 @@ void Application::RunLoop()
         ProcessHotkeys();
 
         auto dt = DeltaTime(previous_time);
-        if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond()))
+        if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond())) {
             physics_->Step(dt);
+            graphics_.Record(dt, physics_->Telemetry());
+        }
 
         phys_obj_view_->Update();
         auto [sim_width, sim_height] =
@@ -105,6 +108,7 @@ void Application::RunLoop()
             ui_controller_,
             sim_controller_,
             settings_,
+            graphics_,
             sim_texture
         );
 

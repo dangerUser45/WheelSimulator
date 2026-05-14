@@ -11,6 +11,7 @@
 #include "physics/physics.hpp"
 
 #include "render/sim_render.hpp"
+#include "render/graphics.hpp"
 #include "render/ui_layout.hpp"
 #include "render/ui_render.hpp"
 
@@ -25,6 +26,7 @@ private:
     
     UIRender ui_render_{window_controller_.Window()};
     SimRender sim_render_{};
+    Graphics graphics_{};
     SimulationSettings settings_{};
     
     std::unique_ptr<Physics> physics_{};

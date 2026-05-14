@@ -10,6 +10,7 @@
 
 #include "config/simulation_settings.hpp"
 #include "control/ui_controller.hpp"
+#include "render/graphics.hpp"
 
 namespace whsim::UIImpl {
 
@@ -20,6 +21,6 @@ void DrawMenu(UIController& ui_ctrl, SimController& sim_ctrl);
 void DrawSimulation(GLuint simulation_texture);
 void DrawSimulationFullscreen(GLuint simulation_texture);
 void DrawSettings(SimulationSettings& settings);
-void DrawGraphics();
+void DrawGraphics(const Graphics& graphics);
 
 } // namespace whsim::UIImpl

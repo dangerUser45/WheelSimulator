@@ -3,11 +3,13 @@
 #include <algorithm>
 
 #include <imgui.h>
+#include <implot.h>
 
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
 
 #include "config/simulation_settings.hpp"
+#include "render/graphics.hpp"
 #include "render/ui_layout.hpp"
 
 namespace whsim::UIImpl {
@@ -130,6 +132,46 @@ struct MenuButtonPalette {
 
     ImGui::PopID();
     return clicked;
+}
+
+void PushPanelStyle()
+{
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(24, 27, 32, 255));
+    ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(52, 58, 68, 255));
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{18.0f, 18.0f});
+}
+
+void PopPanelStyle()
+{
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor(2);
+}
+
+void DrawPlot(
+    const char* title,
+    const char* y_label,
+    const std::vector<float>& time,
+    const std::vector<float>& values)
+{
+    if (time.empty() || values.empty()) {
+        ImGui::TextColored(ImVec4{0.72f, 0.75f, 0.80f, 1.0f}, "%s: no data", title);
+        return;
+    }
+
+    ImPlot::PushStyleColor(ImPlotCol_Line, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, IM_COL32(17, 17, 19, 255));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, IM_COL32(17, 17, 19, 255));
+    ImPlot::PushStyleColor(ImPlotCol_AxisGrid, IM_COL32(52, 58, 68, 255));
+
+    if (ImPlot::BeginPlot(title, ImVec2{-1.0f, 220.0f})) {
+        ImPlot::SetupAxes("time, s", y_label, ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+        ImPlot::PlotLine(title, time.data(), values.data(), static_cast<int>(std::min(time.size(), values.size())));
+        ImPlot::EndPlot();
+    }
+
+    ImPlot::PopStyleColor(4);
 }
 
 } // namespace
@@ -428,12 +470,40 @@ void DrawSettings(SimulationSettings& settings)
     DrawSection(draw_settings, "Settings");
 }
 
-void DrawGraphics()
+void DrawGraphics(const Graphics& graphics)
 {
-    auto draw_graphics = [](auto draw, ImVec2 pos_window, ImVec2 size_window){
+    auto draw_graphics = [&graphics](auto draw, ImVec2 pos_window, ImVec2 size_window){
         (void)draw;
         (void)pos_window;
-        (void)size_window;
+
+        const ImVec2 panel_pos{
+            UILayout::CONTENT_PANEL_MARGIN,
+            UILayout::SIMULATION_PANEL_MARGIN
+        };
+        const ImVec2 panel_size{
+            size_window.x - UILayout::CONTENT_PANEL_MARGIN * 2.0f,
+            size_window.y - UILayout::SIMULATION_PANEL_MARGIN - UILayout::CONTENT_PANEL_MARGIN
+        };
+
+        ImGui::SetCursorPos(panel_pos);
+        PushPanelStyle();
+        ImGui::BeginChild("GraphicsPanel", panel_size, true);
+
+        const GraphicsSeries& series = graphics.Series();
+        ImGui::TextColored(ImVec4{0.0f, 0.56f, 1.0f, 1.0f}, "Simulation telemetry");
+        ImGui::Spacing();
+        ImGui::BeginChild("GraphicsScroll", ImVec2{0.0f, 0.0f}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+        DrawPlot("Position X", "x, m", series.time, series.position_x);
+        DrawPlot("Position Y", "y, m", series.time, series.position_y);
+        DrawPlot("Position Z", "z, m", series.time, series.position_z);
+        DrawPlot("Speed", "m/s", series.time, series.speed);
+        DrawPlot("Acceleration", "m/s^2", series.time, series.acceleration);
+        DrawPlot("Total energy", "J", series.time, series.total_energy);
+
+        ImGui::EndChild();
+        ImGui::EndChild();
+        PopPanelStyle();
     };
     DrawSection(draw_graphics, "Graphics");
 }

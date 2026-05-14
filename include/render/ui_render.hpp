@@ -10,6 +10,7 @@
 #include "control/sim_controller.hpp"
 #include "control/ui_controller.hpp"
 #include "config/simulation_settings.hpp"
+#include "render/graphics.hpp"
 
 namespace whsim {
 
@@ -23,6 +24,7 @@ private:
         UIController& ui_ctrl,
         SimController& sim_ctrl,
         SimulationSettings& settings,
+        const Graphics& graphics,
         GLuint sim_texture) const;
 
 public:
@@ -39,6 +41,7 @@ public:
         UIController& ui_ctrl,
         SimController& sim_ctrl,
         SimulationSettings& settings,
+        const Graphics& graphics,
         GLuint sim_texture) const;
 };
 
