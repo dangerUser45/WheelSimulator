@@ -147,6 +147,7 @@ void Application::RunLoop()
         glfwPollEvents();
         window_controller_.ProcessInput();
         ProcessHotkeys();
+        ProcessCameraSpeedScroll();
 
         auto dt = DeltaTime(previous_time);
         if (sim_controller_.ShouldStepSimulation(ui_controller_.GetMenuCond())) {
@@ -182,7 +183,6 @@ void Application::RunLoop()
             graphics_,
             sim_texture
         );
-        ProcessCameraSpeedScroll();
 
         if (PhysicsResetSettingsChanged(previous_settings, settings_)) {
             sim_controller_.SetStopFlag(true);
