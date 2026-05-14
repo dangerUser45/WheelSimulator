@@ -1,6 +1,8 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btVector3.h>
 
+#include <cmath>
+
 #include "physics/physics.hpp"
 
 namespace whsim {
@@ -30,6 +32,7 @@ Physics::Physics(const SimulationSettings& settings) :
     )),
     settings_(settings),
     terrain_grid_(settings_.terrain),
+    world_origin_offset_{0.0f, 0.0f, 0.0f},
     wheels_(4),
     suspensions_(4),
     car_body_{},
@@ -202,9 +205,23 @@ void Physics::UpdateTerrainAroundWheel()
         return;
     }
 
-    const btVector3 origin = body->getWorldTransform().getOrigin();
+    const btVector3 origin = body->getWorldTransform().getOrigin() +
+        world_origin_offset_;
+    const btVector3 old_center{
+        terrain_grid_.CenterX(),
+        terrain_grid_.CenterY(),
+        0.0f
+    };
 
     if (terrain_grid_.CenterAround(origin.x(), origin.y())) {
+        const btVector3 new_center{
+            terrain_grid_.CenterX(),
+            terrain_grid_.CenterY(),
+            0.0f
+        };
+        const btVector3 delta = new_center - old_center;
+        world_origin_offset_ += delta;
+        RebaseWorld(delta);
         MoveTerrainBody();
     }
 }
@@ -218,8 +235,8 @@ void Physics::MoveTerrainBody()
     btTransform ground_transform{};
     ground_transform.setIdentity();
     ground_transform.setOrigin(btVector3{
-        terrain_grid_.CenterX(),
-        terrain_grid_.CenterY(),
+        terrain_grid_.CenterX() - world_origin_offset_.x(),
+        terrain_grid_.CenterY() - world_origin_offset_.y(),
         0.0f
     });
 
@@ -230,6 +247,86 @@ void Physics::MoveTerrainBody()
     }
 
     world_->updateSingleAabb(terrain_.rigid_body.get());
+}
+
+void Physics::RebaseWorld(const btVector3& delta)
+{
+    auto rebase = [this, &delta](BulletObj& object) {
+        if (object.rigid_body == nullptr || object.rigid_body == terrain_.rigid_body) {
+            return;
+        }
+
+        btTransform transform = object.rigid_body->getWorldTransform();
+        transform.setOrigin(transform.getOrigin() - delta);
+        object.rigid_body->setWorldTransform(transform);
+
+        if (object.state != nullptr) {
+            object.state->setWorldTransform(transform);
+        }
+
+        world_->updateSingleAabb(object.rigid_body.get());
+    };
+
+    for (BulletObj& wheel : wheels_) {
+        rebase(wheel);
+    }
+    for (BulletObj& suspension : suspensions_) {
+        rebase(suspension);
+    }
+    rebase(car_body_);
+}
+
+PhysicsTelemetry Physics::Telemetry() const noexcept
+{
+    PhysicsTelemetry telemetry{};
+    const BulletObj* target = nullptr;
+
+    if (wheels_[idx(CarSide::LF)].rigid_body != nullptr) {
+        target = &wheels_[idx(CarSide::LF)];
+    } else if (car_body_.rigid_body != nullptr) {
+        target = &car_body_;
+    }
+
+    if (target != nullptr) {
+        const btVector3 position =
+            target->rigid_body->getWorldTransform().getOrigin() +
+            world_origin_offset_;
+        const btVector3 velocity = target->rigid_body->getLinearVelocity();
+
+        telemetry.position_x = position.x();
+        telemetry.position_y = position.y();
+        telemetry.position_z = position.z();
+        telemetry.velocity_x = velocity.x();
+        telemetry.velocity_y = velocity.y();
+        telemetry.velocity_z = velocity.z();
+        telemetry.speed = velocity.length();
+    }
+
+    constexpr float gravity = 9.81f;
+    auto add_energy = [&telemetry](const BulletObj& object) {
+        if (object.rigid_body == nullptr || object.rigid_body->isStaticObject()) {
+            return;
+        }
+
+        const float mass = 1.0f / object.rigid_body->getInvMass();
+        const btVector3 velocity = object.rigid_body->getLinearVelocity();
+        const btVector3 angular_velocity = object.rigid_body->getAngularVelocity();
+        const float height = object.rigid_body->getWorldTransform().getOrigin().z();
+        telemetry.total_energy +=
+            0.5f * mass * velocity.length2() +
+            0.5f * mass * angular_velocity.length2() +
+            mass * gravity * height;
+    };
+
+    for (const BulletObj& wheel : wheels_) {
+        add_energy(wheel);
+    }
+    for (const BulletObj& suspension : suspensions_) {
+        add_energy(suspension);
+    }
+    add_energy(car_body_);
+
+    return telemetry;
 }
 
 const std::vector<Physics::BulletObj>& Physics::Wheels() const noexcept { return wheels_; }

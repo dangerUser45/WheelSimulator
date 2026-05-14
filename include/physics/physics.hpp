@@ -12,6 +12,17 @@
 
 namespace whsim {
 
+struct PhysicsTelemetry {
+    float position_x = 0.0f;
+    float position_y = 0.0f;
+    float position_z = 0.0f;
+    float speed = 0.0f;
+    float velocity_x = 0.0f;
+    float velocity_y = 0.0f;
+    float velocity_z = 0.0f;
+    float total_energy = 0.0f;
+};
+
 enum class CarSide : std::uint8_t {
     LF = 0,     // left forward side
     RF = 1,     // right forward side
@@ -46,6 +57,7 @@ public:
     [[nodiscard]] const BulletObj& Terrain() const noexcept;
     [[nodiscard]] const TerrainGrid& TerrainGridData() const noexcept;
     [[nodiscard]] const BulletObj& CarBody() const noexcept;
+    [[nodiscard]] PhysicsTelemetry Telemetry() const noexcept;
 
 private:
     std::unique_ptr<btDefaultCollisionConfiguration> collision_config_;
@@ -57,6 +69,7 @@ private:
 
     SimulationSettings settings_;
     TerrainGrid terrain_grid_;
+    btVector3 world_origin_offset_{0.0f, 0.0f, 0.0f};
 
     // какие в целом объекты:
     //      земля (массив высот)
@@ -77,6 +90,7 @@ private:
     void ApplyWheelDrive(CarSide side);
     void UpdateTerrainAroundWheel();
     void MoveTerrainBody();
+    void RebaseWorld(const btVector3& delta);
 };
 
 } // namespace whsim
