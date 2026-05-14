@@ -7,7 +7,7 @@
 # Wheel Simulator
 
 <p align="center">
-  <img width="700" src="docs/simulation_demo.gif" alt="Wheel Simulator demo">
+  <img width="700" src="docs/images/simulation_animated.gif" alt="Wheel Simulator demo">
 </p>
 
 **Wheel Simulator** — C++ приложение для симуляции движения колеса по неровной поверхности.
