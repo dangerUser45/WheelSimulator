@@ -174,6 +174,42 @@ void DrawPlot(
     ImPlot::PopStyleColor(4);
 }
 
+void DrawSettingHeader(const char* label)
+{
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4{0.0f, 0.56f, 1.0f, 1.0f}, "%s", label);
+}
+
+void DrawFloatControl(
+    const char* label,
+    float& value,
+    float min_value,
+    float max_value,
+    const char* format)
+{
+    ImGui::PushID(label);
+    ImGui::TextUnformatted(label);
+
+    const float input_width = 96.0f;
+    const float spacing = 12.0f;
+    const float slider_width = std::max(
+        120.0f,
+        ImGui::GetContentRegionAvail().x - input_width - spacing);
+
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
+    ImGui::SetNextItemWidth(slider_width);
+    ImGui::SliderFloat("##slider", &value, min_value, max_value, format);
+    ImGui::PopStyleColor(2);
+
+    ImGui::SameLine(0.0f, spacing);
+    ImGui::SetNextItemWidth(input_width);
+    ImGui::InputFloat("##input", &value, 0.0f, 0.0f, format);
+    value = std::clamp(value, min_value, max_value);
+
+    ImGui::PopID();
+}
+
 } // namespace
 
 void ConfigureImGui()
@@ -425,47 +461,54 @@ void DrawSettings(SimulationSettings& settings)
     auto draw_settings = [&settings](auto draw, ImVec2 pos_window, ImVec2 size_window){
         (void)draw;
         (void)pos_window;
-        (void)size_window;
-
-        constexpr float settings_width = 320.0f;
+        
         const char* camera_modes[] = {"FollowWheel", "Free"};
         int camera_mode = settings.camera.mode == CameraMode::FollowWheel
             ? 0
             : 1;
 
-        ImGui::SetCursorPos(ImVec2(
+        const ImVec2 panel_pos(
             UILayout::CONTENT_PANEL_MARGIN,
-            UILayout::SIMULATION_PANEL_MARGIN));
+            UILayout::SIMULATION_PANEL_MARGIN);
+        const ImVec2 panel_size(
+            std::min(720.0f, size_window.x - UILayout::CONTENT_PANEL_MARGIN * 2.0f),
+            size_window.y - UILayout::SIMULATION_PANEL_MARGIN - UILayout::CONTENT_PANEL_MARGIN);
 
-        ImGui::PushItemWidth(settings_width);
+        ImGui::SetCursorPos(panel_pos);
+        PushPanelStyle();
+        ImGui::BeginChild("SettingsPanel", panel_size, true);
 
-        ImGui::TextUnformatted("Wheel");
-        ImGui::SliderFloat("Radius", &settings.wheel.radius, 0.10f, 1.00f, "%.2f");
-        ImGui::SliderFloat("Width", &settings.wheel.width, 0.05f, 0.50f, "%.2f");
-        ImGui::SliderFloat("Mass", &settings.wheel.mass, 0.10f, 20.00f, "%.2f");
-        ImGui::SliderFloat("Speed", &settings.wheel.target_angular_speed, -40.00f, 40.00f, "%.2f");
+        DrawSettingHeader("Wheel");
+        DrawFloatControl("Radius", settings.wheel.radius, 0.10f, 1.00f, "%.2f");
+        DrawFloatControl("Width", settings.wheel.width, 0.05f, 0.50f, "%.2f");
+        DrawFloatControl("Mass", settings.wheel.mass, 0.10f, 20.00f, "%.2f");
+        DrawFloatControl("Speed", settings.wheel.target_angular_speed, -40.00f, 40.00f, "%.2f");
 
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Friction");
-        ImGui::SliderFloat("Wheel friction", &settings.wheel.friction, 0.00f, 3.00f, "%.2f");
-        ImGui::SliderFloat("Rolling friction", &settings.wheel.rolling_friction, 0.00f, 0.25f, "%.3f");
-        ImGui::SliderFloat("Spinning friction", &settings.wheel.spinning_friction, 0.00f, 0.25f, "%.3f");
-        ImGui::SliderFloat("Terrain friction", &settings.terrain.friction, 0.00f, 3.00f, "%.2f");
+        DrawSettingHeader("Friction");
+        DrawFloatControl("Wheel friction", settings.wheel.friction, 0.00f, 3.00f, "%.2f");
+        DrawFloatControl("Rolling friction", settings.wheel.rolling_friction, 0.00f, 0.25f, "%.3f");
+        DrawFloatControl("Spinning friction", settings.wheel.spinning_friction, 0.00f, 0.25f, "%.3f");
+        DrawFloatControl("Terrain friction", settings.terrain.friction, 0.00f, 3.00f, "%.2f");
 
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Terrain");
-        ImGui::SliderFloat("Height", &settings.terrain.height_amplitude, 0.00f, 0.50f, "%.2f");
-        ImGui::SliderFloat("Frequency", &settings.terrain.noise_frequency, 0.05f, 2.00f, "%.2f");
+        DrawSettingHeader("Terrain");
+        DrawFloatControl("Height", settings.terrain.height_amplitude, 0.00f, 0.50f, "%.2f");
+        DrawFloatControl("Frequency", settings.terrain.noise_frequency, 0.05f, 2.00f, "%.2f");
 
-        ImGui::Spacing();
-        ImGui::TextUnformatted("Camera");
+        DrawSettingHeader("Camera");
+        ImGui::TextUnformatted("View mode");
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(34, 38, 45, 255));
+        ImGui::PushStyleColor(ImGuiCol_CheckMark, UILayout::MENU_BUTTON_ACTIVE_INDICATOR_PACKED);
+        ImGui::SetNextItemWidth(-1.0f);
         if (ImGui::Combo("View mode", &camera_mode, camera_modes, 2)) {
             settings.camera.mode = camera_mode == 0
                 ? CameraMode::FollowWheel
                 : CameraMode::Free;
         }
+        ImGui::PopStyleColor(2);
+        DrawFloatControl("Free camera speed", settings.camera.free_move_speed, 0.50f, 50.00f, "%.2f");
 
-        ImGui::PopItemWidth();
+        ImGui::EndChild();
+        PopPanelStyle();
     };
     DrawSection(draw_settings, "Settings");
 }
