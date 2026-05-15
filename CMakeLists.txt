@@ -7,7 +7,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(SANITIZE "Enable sanitizers" OFF)
 
 find_package(Bullet REQUIRED CONFIG)
-find_package(Eigen3 REQUIRED CONFIG)
 find_package(glad   REQUIRED CONFIG)
 find_package(glfw3  REQUIRED CONFIG)
 find_package(glm    REQUIRED CONFIG)
@@ -68,7 +67,6 @@ target_include_directories(WheelSimulator PRIVATE
 
 target_link_libraries(WheelSimulator PRIVATE
     Bullet::Bullet
-    Eigen3::Eigen
     glad::glad
     glfw
     glm::glm
