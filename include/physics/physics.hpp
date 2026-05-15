@@ -71,14 +71,6 @@ private:
     TerrainGrid terrain_grid_;
     btVector3 world_origin_offset_{0.0f, 0.0f, 0.0f};
 
-    // какие в целом объекты:
-    //      земля (массив высот)
-    //      4 колеса
-    //      4 подвески (пружины)
-    //      1 корпус машины
-
-    // struct BulletObj;
-
     std::vector<BulletObj> wheels_;
     std::vector<BulletObj> suspensions_;
     BulletObj car_body_;
