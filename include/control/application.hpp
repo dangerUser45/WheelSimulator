@@ -35,14 +35,21 @@ private:
     bool pause_toggle_shortcut_pressed_ = false;
     bool fullscreen_toggle_shortcut_pressed_ = false;
     bool reset_simulation_shortcut_pressed_ = false;
-    bool main_menu_shortcut_pressed_ = false;
-    bool settings_menu_shortcut_pressed_ = false;
-    bool simulation_menu_shortcut_pressed_ = false;
-    bool graphics_menu_shortcut_pressed_ = false;
+
     bool back_navigation_shortcut_pressed_ = false;
 
 private:
     void ProcessHotkeys();
+    void ProccessMenuSwitching(GLFWwindow* const window, bool ctrl_pressed);
+    void ProcessMenuSection(GLFWwindow* const window,
+        const MenuCond menu_cond, bool ctrl_pressed, auto glfw_key);
+
+    void ProccessSimulationStates(GLFWwindow* const window, bool ctrl_pressed);
+    void ProccessSimReset(GLFWwindow* const window, bool ctrl_pressed, bool sim_is_active);
+    void ProccessSimPause(GLFWwindow* const window, bool sim_is_active);
+    void ProccessSimFullScreen(GLFWwindow* const window, bool sim_is_active);
+    void ProccessBackNavigation(GLFWwindow* const window);
+
     void ProcessCameraSpeedScroll();
 
 public:

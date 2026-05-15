@@ -25,7 +25,7 @@ bool SimController::ShouldStepSimulation(const MenuCond& menu_cond) const noexce
 bool SimController::RequestReset() noexcept
 {
     if(is_requested_reset_) {
-        is_requested_reset_ = false;
+        this->SetResetFlag(false);
         return true;
     }
     return false;
