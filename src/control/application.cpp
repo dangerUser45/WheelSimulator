@@ -139,8 +139,7 @@ void Application::ProcessCameraSpeedScroll()
         return;
     }
 
-    const auto wheel_delta =
-        static_cast<float>(window_controller_.ConsumeScrollYOffset());
+    const auto wheel_delta = window_controller_.ConsumeScrollYOffset();
     if (wheel_delta == 0.0f) {
         return;
     }
@@ -171,7 +170,7 @@ void Application::RunLoop()
         phys_obj_view_->Update();
         auto [sim_width, sim_height] =
             SimulationTextureSize(window_controller_.Window(), ui_controller_);
-        const bool camera_input_enabled =
+        const bool is_in_sim_menu =
             ui_controller_.GetMenuCond() == MenuCond::SIMULATION;
 
         const GLuint sim_texture = sim_render_.Render(
@@ -181,7 +180,7 @@ void Application::RunLoop()
             sim_width,
             sim_height,
             dt,
-            camera_input_enabled,
+            is_in_sim_menu,
             settings_
         );
 
