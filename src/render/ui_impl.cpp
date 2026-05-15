@@ -547,7 +547,7 @@ void DrawGraphics(const Graphics& graphics)
         DrawPlot("Position Z", "z, m", series.time, series.position_z);
         DrawPlot("Speed", "m/s", series.time, series.speed);
         DrawPlot("Acceleration", "m/s^2", series.time, series.acceleration);
-        DrawPlot("Total energy", "J", series.time, series.total_energy);
+        DrawPlot("Total energy", "E", series.time, series.total_energy);
 
         ImGui::EndChild();
         ImGui::EndChild();
