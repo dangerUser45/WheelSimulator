@@ -12,7 +12,7 @@ enum class CameraMode : std::uint8_t {
 struct WheelSettings {
     float radius = 0.35f;
     float width = 0.12f;
-    float mass = 1.0f;
+    float mass = 10.0f;
     float friction = 1.2f;
     float rolling_friction = 0.02f;
     float spinning_friction = 0.02f;
