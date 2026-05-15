@@ -10,7 +10,7 @@ namespace whsim {
 class WindowController final {
 private:
     GLFWwindow* window_ = nullptr;
-    double scroll_y_offset_ = 0.0;
+    float scroll_y_offset_ = 0.0;
 
 public:
     WindowController(int init_window_width, int init_window_height);
@@ -24,7 +24,7 @@ public:
     void ProcessInput() const;
     void AddScrollYOffset(double yoffset) noexcept;
     [[nodiscard]] bool ShouldClose() const;
-    [[nodiscard]] double ConsumeScrollYOffset() noexcept;
+    [[nodiscard]] float ConsumeScrollYOffset() noexcept;
 
     [[nodiscard]] GLFWwindow* Window() const noexcept;
 };

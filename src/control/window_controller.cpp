@@ -95,12 +95,12 @@ bool WindowController::ShouldClose() const
 
 void WindowController::AddScrollYOffset(double yoffset) noexcept
 {
-    scroll_y_offset_ += yoffset;
+    scroll_y_offset_ += static_cast<float>(yoffset);
 }
 
-double WindowController::ConsumeScrollYOffset() noexcept
+float WindowController::ConsumeScrollYOffset() noexcept
 {
-    const double yoffset = scroll_y_offset_;
+    const float yoffset = scroll_y_offset_;
     scroll_y_offset_ = 0.0;
     return yoffset;
 }
